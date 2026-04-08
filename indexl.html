@@ -1,0 +1,2243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Révision — Arbres, Graphes, Complexité</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f5f5f0;color:#2d2d2d;line-height:1.7;font-size:15px}
+::selection{background:#3b82f6;color:#fff}
+
+/* === LAYOUT === */
+.wrap{max-width:900px;margin:0 auto;padding:2.5rem 2rem 5rem}
+
+/* === NAV === */
+nav{background:#fff;border-bottom:1px solid #e0e0e0;position:sticky;top:0;z-index:100;padding:0.7rem 0}
+nav .inner{max-width:900px;margin:0 auto;padding:0 2rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center}
+nav a{font-size:0.78rem;font-weight:600;text-decoration:none;color:#888;padding:0.25rem 0.6rem;border-radius:6px;transition:all 0.2s}
+nav a:hover{color:#3b82f6;background:#eff6ff}
+nav .dot{color:#ddd;font-size:0.6rem}
+
+/* === HERO === */
+.hero{text-align:center;padding:3rem 0 2rem}
+.hero h1{font-size:2.4rem;font-weight:800;letter-spacing:-0.03em;color:#111;line-height:1.15;margin-bottom:0.5rem}
+.hero h1 span{background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:#888;font-size:0.95rem}
+.hero-tags{display:flex;justify-content:center;gap:0.4rem;margin-top:1rem;flex-wrap:wrap}
+.hero-tags span{font-size:0.7rem;font-weight:600;padding:0.2rem 0.55rem;border-radius:20px;background:#fff;border:1px solid #e5e5e5;color:#666}
+
+/* === SECTIONS === */
+h2{font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;margin:3rem 0 1.2rem;color:#111;display:flex;align-items:center;gap:0.6rem}
+h2 .badge{font-size:0.65rem;font-weight:700;padding:0.2rem 0.55rem;border-radius:4px;color:#fff;letter-spacing:0.03em}
+.badge-tree{background:#16a34a}
+.badge-graph{background:#2563eb}
+.badge-complex{background:#dc2626}
+.badge-exo{background:#7c3aed}
+
+h3{font-size:1.1rem;font-weight:700;margin:1.8rem 0 0.7rem;color:#333}
+h4{font-size:0.92rem;font-weight:600;margin:1rem 0 0.4rem;color:#444}
+p{margin-bottom:0.5rem}
+ul,ol{margin:0.3rem 0 0.7rem 1.3rem}
+li{margin-bottom:0.2rem}
+hr{border:none;height:1px;background:#e0e0e0;margin:2.5rem 0}
+
+/* === CARDS === */
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:1.2rem 1.4rem;margin:0.8rem 0;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card-title{font-weight:700;font-size:0.9rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+@media(max-width:650px){.card-grid{grid-template-columns:1fr}}
+
+/* === BOX ALERTS === */
+.box{padding:0.85rem 1.1rem;margin:0.8rem 0;border-radius:8px;border-left:4px solid}
+.box p:last-child{margin-bottom:0}
+.box-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.3rem}
+.box-def{background:#eff6ff;border-color:#3b82f6}.box-def .box-label{color:#3b82f6}
+.box-warn{background:#fef2f2;border-color:#ef4444}.box-warn .box-label{color:#ef4444}
+.box-tip{background:#f0fdf4;border-color:#16a34a}.box-tip .box-label{color:#16a34a}
+.box-info{background:#faf5ff;border-color:#8b5cf6}.box-info .box-label{color:#8b5cf6}
+
+/* === CODE === */
+pre{font-family:'JetBrains Mono',monospace;font-size:0.8rem;line-height:1.65;background:#1e1e2e;color:#cdd6f4;padding:1rem 1.2rem;border-radius:8px;overflow-x:auto;margin:0.7rem 0;position:relative}
+code{font-family:'JetBrains Mono',monospace;font-size:0.82em;background:#e8e8e8;padding:0.1em 0.35em;border-radius:4px;color:#c7254e}
+
+/* Catppuccin Mocha tokens */
+.kw{color:#cba6f7;font-weight:500}
+.fn{color:#89b4fa}
+.st{color:#a6e3a1}
+.nu{color:#fab387}
+.cm{color:#6c7086;font-style:italic}
+.op{color:#89dceb}
+
+/* === TABLES === */
+.table-wrap{overflow-x:auto;margin:0.7rem 0}
+table{width:100%;border-collapse:collapse;font-size:0.83rem}
+th,td{padding:0.45rem 0.7rem;border:1px solid #e5e5e5;text-align:left}
+th{background:#f8f8f8;font-weight:600;font-size:0.78rem;color:#555}
+tr:hover td{background:#fafafa}
+
+/* === VISUAL SCALE === */
+.scale{display:flex;gap:3px;margin:0.8rem 0;border-radius:8px;overflow:hidden}
+.scale span{flex:1;text-align:center;padding:8px 2px;font-size:0.68rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:#fff;transition:flex 0.3s}
+.scale span:hover{flex:1.8}
+
+/* === FORMULA === */
+.formula{font-family:'JetBrains Mono',monospace;text-align:center;padding:0.7rem;margin:0.6rem 0;background:#fff;border:1px solid #e5e5e5;border-radius:8px;font-size:0.92rem;color:#333;font-weight:500}
+
+/* === DIAGRAMS === */
+.diagram{text-align:center;margin:1rem 0;padding:1.2rem;background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow-x:auto}
+.diagram svg{max-width:100%;height:auto}
+.diagram-cap{font-size:0.75rem;color:#999;margin-top:0.5rem;font-style:italic}
+
+/* === EXERCICES === */
+.exo{background:#fff;border:1px solid #e5e5e5;border-radius:10px;margin:1rem 0;overflow:hidden;transition:box-shadow 0.2s}
+.exo:hover{box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.exo-head{padding:0.7rem 1.2rem;display:flex;align-items:center;gap:0.7rem;border-bottom:1px solid #f0f0f0}
+.exo-tag{font-size:0.65rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:4px;background:#f5f5f5;color:#888;white-space:nowrap}
+.exo-head h4{font-size:0.88rem;font-weight:600;margin:0}
+.exo-body{padding:0.9rem 1.2rem}
+.sol-btn{display:inline-flex;align-items:center;gap:0.4rem;font-family:inherit;font-size:0.8rem;font-weight:600;color:#3b82f6;background:#eff6ff;border:none;padding:0.4rem 0.9rem;border-radius:6px;cursor:pointer;margin-top:0.5rem;transition:all 0.2s}
+.sol-btn:hover{background:#dbeafe}
+.sol-btn .arrow{font-size:0.6rem;transition:transform 0.2s}
+.sol-btn.open .arrow{transform:rotate(90deg)}
+.sol-box{max-height:0;overflow:hidden;transition:max-height 0.4s ease}
+.sol-box.open{max-height:5000px}
+.sol-inner{padding-top:0.8rem;border-top:1px dashed #e5e5e5;margin-top:0.8rem}
+
+/* === FLASHCARDS === */
+.fc{border:1px solid #e5e5e5;border-radius:8px;margin:0.4rem 0;cursor:pointer;overflow:hidden;background:#fff;transition:border-color 0.2s}
+.fc:hover{border-color:#3b82f6}
+.fc-q{padding:0.55rem 1rem;font-weight:500;font-size:0.86rem;display:flex;justify-content:space-between;align-items:center}
+.fc-q::after{content:'>';color:#ccc;font-size:1.1rem;font-weight:300;transition:transform 0.2s}
+.fc.open .fc-q::after{transform:rotate(90deg);color:#3b82f6}
+.fc-a{display:none;padding:0.55rem 1rem;background:#f8fafe;border-top:1px solid #eef;font-size:0.84rem;color:#444}
+.fc.open .fc-a{display:block}
+
+/* === PRINT === */
+@media print{nav{display:none}body{background:#fff;font-size:11px}pre{font-size:9px}.sol-box{max-height:none!important}.fc-a{display:block!important}}
+</style>
+</head>
+<body>
+
+<nav><div class="inner">
+  <a href="#arbres">Arbres</a><span class="dot">&middot;</span>
+  <a href="#abr">ABR</a><span class="dot">&middot;</span>
+  <a href="#tas">Tas</a><span class="dot">&middot;</span>
+  <a href="#tries">Tries</a><span class="dot">&middot;</span>
+  <a href="#graphes">Graphes</a><span class="dot">&middot;</span>
+  <a href="#dfs-bfs">DFS/BFS</a><span class="dot">&middot;</span>
+  <a href="#kruskal">Kruskal</a><span class="dot">&middot;</span>
+  <a href="#dijkstra">Dijkstra</a><span class="dot">&middot;</span>
+  <a href="#complexite">Complexite</a><span class="dot">&middot;</span>
+  <a href="#exo-arbres">Exos Arbres</a><span class="dot">&middot;</span>
+  <a href="#exo-graphes">Exos Graphes</a><span class="dot">&middot;</span>
+  <a href="#exo-complexite">Exos Complexite</a><span class="dot">&middot;</span>
+  <a href="#flashcards">Flashcards</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ====== HERO ====== -->
+<div class="hero">
+  <h1>Arbres, Graphes &amp; <span>Complexite</span></h1>
+  <p>Guide de revision complet -- Partiel Algorithmique</p>
+  <div class="hero-tags">
+    <span>HA8203I</span><span>PEIP Polytech</span><span>Python</span><span>2025-2026</span>
+  </div>
+</div>
+
+<hr>
+
+<!-- ================================================================= -->
+<!--               I. ARBRES BINAIRES                                  -->
+<!-- ================================================================= -->
+
+<h2 id="arbres"><span class="badge badge-tree">ARBRES</span> I. Arbres binaires</h2>
+
+<h3>1.1 Definitions</h3>
+
+<div class="box box-def">
+  <div class="box-label">Definition</div>
+  <p>Un <strong>arbre binaire</strong> est une structure ou chaque noeud a au plus deux fils : <strong>sous-arbre gauche</strong> (sag) et <strong>sous-arbre droit</strong> (sad). Le noeud sans pere est la <strong>racine</strong>. Un noeud sans fils est une <strong>feuille</strong>.</p>
+</div>
+
+<div class="box box-info">
+  <div class="box-label">Definition recursive</div>
+  <p>Un arbre binaire est soit :</p>
+  <ul>
+    <li><strong>Vide</strong> (note <code>None</code> en Python) -- c'est le cas de base</li>
+    <li>Un <strong>noeud</strong> contenant une valeur, un <strong>sous-arbre gauche</strong> (lui-meme un arbre binaire) et un <strong>sous-arbre droit</strong> (lui-meme un arbre binaire)</li>
+  </ul>
+  <p>Cette definition recursive est fondamentale : elle justifie que tous les algorithmes sur les arbres soient naturellement recursifs. Si l'arbre est vide, on retourne un cas de base. Sinon, on traite la racine et on appelle recursivement sur sag et sad.</p>
+</div>
+
+<div class="card-grid">
+  <div class="card">
+    <div class="card-title">Vocabulaire</div>
+    <ul>
+      <li><strong>Racine</strong> -- noeud au sommet (pas de pere)</li>
+      <li><strong>Feuille</strong> -- noeud sans fils (sag = sad = None)</li>
+      <li><strong>Hauteur</strong> -- nb de niveaux - 1</li>
+      <li><strong>Profondeur</strong> -- distance d'un noeud a la racine</li>
+      <li><strong>Taille</strong> -- nombre total de noeuds</li>
+      <li><strong>Noeud interne</strong> -- noeud qui a au moins un fils</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 260 175" width="260">
+      <line x1="130" y1="30" x2="70" y2="78" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="130" y1="30" x2="190" y2="78" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="70" y1="78" x2="40" y2="130" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="70" y1="78" x2="100" y2="130" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="190" y1="78" x2="220" y2="130" stroke="#cbd5e1" stroke-width="2"/>
+      <circle cx="130" cy="30" r="17" fill="#3b82f6"/>
+      <text x="130" y="35" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12" font-weight="600">5</text>
+      <circle cx="70" cy="78" r="17" fill="#475569"/>
+      <text x="70" y="83" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">10</text>
+      <circle cx="190" cy="78" r="17" fill="#475569"/>
+      <text x="190" y="83" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">20</text>
+      <circle cx="40" cy="130" r="15" fill="#64748b"/>
+      <text x="40" y="135" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">15</text>
+      <circle cx="100" cy="130" r="15" fill="#64748b"/>
+      <text x="100" y="135" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">25</text>
+      <circle cx="220" cy="130" r="15" fill="#64748b"/>
+      <text x="220" y="135" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">30</text>
+      <text x="130" y="14" text-anchor="middle" fill="#3b82f6" font-size="9" font-weight="700" font-family="Inter">racine</text>
+      <text x="40" y="158" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter">feuille</text>
+      <text x="100" y="158" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter">feuille</text>
+      <text x="220" y="158" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter">feuille</text>
+    </svg>
+    <p class="diagram-cap">Arbre binaire : racine = 5, feuilles = 15, 25, 30</p>
+  </div>
+</div>
+
+<h4>Types d'arbres binaires</h4>
+
+<div class="card-grid">
+  <div class="card">
+    <div class="card-title">Arbre complet (parfait en anglais)</div>
+    <p>Tous les niveaux sont <strong>completement remplis</strong>. Un arbre complet de hauteur h a exactement <strong>2<sup>h+1</sup> - 1</strong> noeuds. C'est la forme la plus compacte possible.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Arbre parfait (complet en anglais)</div>
+    <p>Tous les niveaux sont remplis <strong>sauf eventuellement le dernier</strong>, qui est rempli <strong>de gauche a droite</strong>. C'est la forme utilisee dans les tas.</p>
+  </div>
+</div>
+
+<div class="card-grid">
+  <div class="card">
+    <div class="card-title" style="color:#ef4444">Arbre degenere</div>
+    <p>Chaque noeud a <strong>au plus un fils</strong>. L'arbre ressemble a une liste chainee. Hauteur = n - 1 (pire cas). Toutes les operations deviennent O(n).</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Arbre equilibre</div>
+    <p>La hauteur des sous-arbres gauche et droit de chaque noeud <strong>differe d'au plus 1</strong>. Hauteur = O(log n). Les AVL sont des arbres equilibres.</p>
+  </div>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Relations hauteur / taille</div>
+  <p>Pour un arbre binaire a <strong>n</strong> noeuds et de hauteur <strong>h</strong> :</p>
+  <ul>
+    <li><strong>Hauteur minimale :</strong> h = floor(log2(n)) -- arbre complet/parfait, le plus compact</li>
+    <li><strong>Hauteur maximale :</strong> h = n - 1 -- arbre degenere (liste chainee)</li>
+    <li>Donc : <strong>log2(n) &le; h &le; n - 1</strong></li>
+    <li><strong>Nombre de noeuds :</strong> h + 1 &le; n &le; 2<sup>h+1</sup> - 1</li>
+  </ul>
+  <p>Exemple : avec 7 noeuds, la hauteur va de 2 (arbre complet) a 6 (degenere).</p>
+</div>
+
+<h3>1.2 Representation Python</h3>
+<pre><span class="cm"># Chaque noeud = dictionnaire {valeur, sag, sad}</span>
+arbre = {
+    <span class="st">"valeur"</span>: <span class="nu">5</span>,
+    <span class="st">"sag"</span>: {
+        <span class="st">"valeur"</span>: <span class="nu">10</span>,
+        <span class="st">"sag"</span>: {<span class="st">"valeur"</span>: <span class="nu">15</span>, <span class="st">"sag"</span>: <span class="kw">None</span>, <span class="st">"sad"</span>: <span class="kw">None</span>},
+        <span class="st">"sad"</span>: {<span class="st">"valeur"</span>: <span class="nu">25</span>, <span class="st">"sag"</span>: <span class="kw">None</span>, <span class="st">"sad"</span>: <span class="kw">None</span>}
+    },
+    <span class="st">"sad"</span>: {
+        <span class="st">"valeur"</span>: <span class="nu">20</span>,
+        <span class="st">"sag"</span>: <span class="kw">None</span>,
+        <span class="st">"sad"</span>: {<span class="st">"valeur"</span>: <span class="nu">30</span>, <span class="st">"sag"</span>: <span class="kw">None</span>, <span class="st">"sad"</span>: <span class="kw">None</span>}
+    }
+}</pre>
+
+<h3 id="parcours">1.3 Les 4 parcours</h3>
+
+<div class="box box-warn">
+  <div class="box-label">Sujet le plus frequent en examen</div>
+  <p>Savoir donner l'ordre de visite pour chaque parcours sur n'importe quel arbre.</p>
+</div>
+
+<div class="card-grid">
+  <div class="card"><div class="card-title" style="color:#16a34a">Prefixe (RGD)</div><p><strong>Racine</strong> &rarr; Gauche &rarr; Droite</p></div>
+  <div class="card"><div class="card-title" style="color:#2563eb">Infixe (GRD)</div><p>Gauche &rarr; <strong>Racine</strong> &rarr; Droite</p><p style="font-size:0.82rem;color:#888">Sur un ABR &rarr; ordre croissant !</p></div>
+  <div class="card"><div class="card-title" style="color:#dc2626">Postfixe (GDR)</div><p>Gauche &rarr; Droite &rarr; <strong>Racine</strong></p></div>
+  <div class="card"><div class="card-title" style="color:#8b5cf6">Largeur (BFS)</div><p>Niveau par niveau, de haut en bas</p><p style="font-size:0.82rem;color:#888">Utilise une file (queue)</p></div>
+</div>
+
+<h4>Exemple</h4>
+<div class="diagram">
+  <svg viewBox="0 0 320 185" width="320">
+    <line x1="160" y1="25" x2="90" y2="68" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="160" y1="25" x2="230" y2="68" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="90" y1="68" x2="50" y2="115" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="90" y1="68" x2="130" y2="115" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="230" y1="68" x2="200" y2="115" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="230" y1="68" x2="260" y2="115" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="50" y1="115" x2="30" y2="158" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="50" y1="115" x2="70" y2="158" stroke="#cbd5e1" stroke-width="2"/>
+    <circle cx="160" cy="25" r="16" fill="#3b82f6"/><text x="160" y="30" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">9</text>
+    <circle cx="90" cy="68" r="16" fill="#475569"/><text x="90" y="73" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">8</text>
+    <circle cx="230" cy="68" r="16" fill="#475569"/><text x="230" y="73" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">3</text>
+    <circle cx="50" cy="115" r="15" fill="#64748b"/><text x="50" y="120" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">7</text>
+    <circle cx="130" cy="115" r="15" fill="#64748b"/><text x="130" y="120" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">5</text>
+    <circle cx="200" cy="115" r="15" fill="#64748b"/><text x="200" y="120" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">2</text>
+    <circle cx="260" cy="115" r="15" fill="#64748b"/><text x="260" y="120" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">1</text>
+    <circle cx="30" cy="158" r="13" fill="#94a3b8"/><text x="30" y="163" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">4</text>
+    <circle cx="70" cy="158" r="13" fill="#94a3b8"/><text x="70" y="163" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">6</text>
+  </svg>
+  <p class="diagram-cap">Arbre binaire a 9 noeuds pour illustrer les 4 parcours</p>
+</div>
+
+<div class="card">
+  <div class="card-title">Resultats</div>
+  <p><strong>Prefixe :</strong> 9, 8, 7, 4, 6, 5, 3, 2, 1</p>
+  <p><strong>Infixe :</strong> 4, 7, 6, 8, 5, 9, 2, 3, 1</p>
+  <p><strong>Postfixe :</strong> 4, 6, 7, 5, 8, 2, 1, 3, 9</p>
+  <p><strong>Largeur :</strong> 9, 8, 3, 7, 5, 2, 1, 4, 6</p>
+</div>
+
+<h4>SVG -- Ordre de visite prefixe (numeros 1 a 9)</h4>
+<div class="diagram">
+  <svg viewBox="0 0 340 200" width="340">
+    <line x1="170" y1="30" x2="100" y2="73" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="170" y1="30" x2="240" y2="73" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="100" y1="73" x2="60" y2="120" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="100" y1="73" x2="140" y2="120" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="240" y1="73" x2="210" y2="120" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="240" y1="73" x2="270" y2="120" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="60" y1="120" x2="38" y2="165" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="60" y1="120" x2="82" y2="165" stroke="#cbd5e1" stroke-width="2"/>
+    <!-- Nodes -->
+    <circle cx="170" cy="30" r="16" fill="#16a34a"/><text x="170" y="35" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12" font-weight="600">9</text>
+    <circle cx="100" cy="73" r="16" fill="#16a34a"/><text x="100" y="78" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">8</text>
+    <circle cx="240" cy="73" r="16" fill="#16a34a"/><text x="240" y="78" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">3</text>
+    <circle cx="60" cy="120" r="15" fill="#16a34a"/><text x="60" y="125" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">7</text>
+    <circle cx="140" cy="120" r="15" fill="#16a34a"/><text x="140" y="125" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">5</text>
+    <circle cx="210" cy="120" r="15" fill="#16a34a"/><text x="210" y="125" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">2</text>
+    <circle cx="270" cy="120" r="15" fill="#16a34a"/><text x="270" y="125" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">1</text>
+    <circle cx="38" cy="165" r="13" fill="#16a34a"/><text x="38" y="170" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">4</text>
+    <circle cx="82" cy="165" r="13" fill="#16a34a"/><text x="82" y="170" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">6</text>
+    <!-- Visit order labels -->
+    <text x="190" y="22" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">1</text>
+    <text x="82" y="65" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">2</text>
+    <text x="42" y="112" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">3</text>
+    <text x="20" y="158" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">4</text>
+    <text x="98" y="158" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">5</text>
+    <text x="158" y="114" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">6</text>
+    <text x="258" y="65" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">7</text>
+    <text x="228" y="114" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">8</text>
+    <text x="288" y="114" fill="#ef4444" font-family="JetBrains Mono" font-size="10" font-weight="800">9</text>
+  </svg>
+  <p class="diagram-cap">Parcours prefixe (RGD) : les numeros rouges montrent l'ordre de visite 1 a 9</p>
+</div>
+
+<h4>Trace detaillee du parcours prefixe</h4>
+<div class="box box-info">
+  <div class="box-label">Appels recursifs pas a pas</div>
+  <p>On appelle <code>prefixe(9)</code> sur l'arbre ci-dessus. Voici la trace complete :</p>
+</div>
+
+<div class="table-wrap"><table>
+  <tr><th>Appel</th><th>Action</th><th>Sortie accumulee</th></tr>
+  <tr><td>prefixe(9)</td><td>print 9, puis appelle prefixe(sag=8)</td><td>9</td></tr>
+  <tr><td>&nbsp;&nbsp;prefixe(8)</td><td>print 8, puis appelle prefixe(sag=7)</td><td>9, 8</td></tr>
+  <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;prefixe(7)</td><td>print 7, puis appelle prefixe(sag=4)</td><td>9, 8, 7</td></tr>
+  <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefixe(4)</td><td>print 4, puis prefixe(None), prefixe(None)</td><td>9, 8, 7, 4</td></tr>
+  <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;retour a prefixe(7) &rarr; appelle prefixe(sad=6)</td><td>print 6, puis prefixe(None), prefixe(None)</td><td>9, 8, 7, 4, 6</td></tr>
+  <tr><td>&nbsp;&nbsp;retour a prefixe(8) &rarr; appelle prefixe(sad=5)</td><td>print 5, puis prefixe(None), prefixe(None)</td><td>9, 8, 7, 4, 6, 5</td></tr>
+  <tr><td>retour a prefixe(9) &rarr; appelle prefixe(sad=3)</td><td>print 3, puis appelle prefixe(sag=2)</td><td>9, 8, 7, 4, 6, 5, 3</td></tr>
+  <tr><td>&nbsp;&nbsp;prefixe(2)</td><td>print 2, puis prefixe(None), prefixe(None)</td><td>9, 8, 7, 4, 6, 5, 3, 2</td></tr>
+  <tr><td>&nbsp;&nbsp;prefixe(1)</td><td>print 1, puis prefixe(None), prefixe(None)</td><td>9, 8, 7, 4, 6, 5, 3, 2, 1</td></tr>
+</table></div>
+
+<h4>Parcours en largeur -- evolution de la file</h4>
+<div class="box box-def">
+  <div class="box-label">Principe</div>
+  <p>On utilise une <strong>file</strong> (FIFO). On enfile la racine, puis on repete : defiler un noeud, l'afficher, enfiler ses fils gauche et droit s'ils existent.</p>
+</div>
+
+<div class="table-wrap"><table>
+  <tr><th>Etape</th><th>Action</th><th>Etat de la file</th><th>Sortie</th></tr>
+  <tr><td>Init</td><td>Enfiler la racine</td><td>[9]</td><td>--</td></tr>
+  <tr><td>1</td><td>Defiler 9, enfiler 8 et 3</td><td>[8, 3]</td><td>9</td></tr>
+  <tr><td>2</td><td>Defiler 8, enfiler 7 et 5</td><td>[3, 7, 5]</td><td>9, 8</td></tr>
+  <tr><td>3</td><td>Defiler 3, enfiler 2 et 1</td><td>[7, 5, 2, 1]</td><td>9, 8, 3</td></tr>
+  <tr><td>4</td><td>Defiler 7, enfiler 4 et 6</td><td>[5, 2, 1, 4, 6]</td><td>9, 8, 3, 7</td></tr>
+  <tr><td>5</td><td>Defiler 5 (pas de fils)</td><td>[2, 1, 4, 6]</td><td>9, 8, 3, 7, 5</td></tr>
+  <tr><td>6</td><td>Defiler 2 (pas de fils)</td><td>[1, 4, 6]</td><td>9, 8, 3, 7, 5, 2</td></tr>
+  <tr><td>7</td><td>Defiler 1 (pas de fils)</td><td>[4, 6]</td><td>9, 8, 3, 7, 5, 2, 1</td></tr>
+  <tr><td>8</td><td>Defiler 4 (pas de fils)</td><td>[6]</td><td>9, 8, 3, 7, 5, 2, 1, 4</td></tr>
+  <tr><td>9</td><td>Defiler 6 (pas de fils)</td><td>[] (vide)</td><td>9, 8, 3, 7, 5, 2, 1, 4, 6</td></tr>
+</table></div>
+
+<pre><span class="cm"># Prefixe : Racine, Gauche, Droite</span>
+<span class="kw">def</span> <span class="fn">prefixe</span>(a):
+    <span class="kw">if</span> a <span class="kw">is not</span> <span class="kw">None</span>:
+        <span class="fn">print</span>(a[<span class="st">'valeur'</span>])
+        <span class="fn">prefixe</span>(a[<span class="st">'sag'</span>])
+        <span class="fn">prefixe</span>(a[<span class="st">'sad'</span>])
+
+<span class="cm"># Infixe : Gauche, Racine, Droite</span>
+<span class="kw">def</span> <span class="fn">infixe</span>(a):
+    <span class="kw">if</span> a <span class="kw">is not</span> <span class="kw">None</span>:
+        <span class="fn">infixe</span>(a[<span class="st">'sag'</span>])
+        <span class="fn">print</span>(a[<span class="st">'valeur'</span>])
+        <span class="fn">infixe</span>(a[<span class="st">'sad'</span>])
+
+<span class="cm"># Postfixe : Gauche, Droite, Racine</span>
+<span class="kw">def</span> <span class="fn">postfixe</span>(a):
+    <span class="kw">if</span> a <span class="kw">is not</span> <span class="kw">None</span>:
+        <span class="fn">postfixe</span>(a[<span class="st">'sag'</span>])
+        <span class="fn">postfixe</span>(a[<span class="st">'sad'</span>])
+        <span class="fn">print</span>(a[<span class="st">'valeur'</span>])
+
+<span class="cm"># Largeur (BFS) : utilise une file</span>
+<span class="kw">def</span> <span class="fn">largeur</span>(a):
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span>
+    file = [a]
+    <span class="kw">while</span> file:
+        n = file.<span class="fn">pop</span>(<span class="nu">0</span>)
+        <span class="fn">print</span>(n[<span class="st">'valeur'</span>])
+        <span class="kw">if</span> n[<span class="st">'sag'</span>]: file.<span class="fn">append</span>(n[<span class="st">'sag'</span>])
+        <span class="kw">if</span> n[<span class="st">'sad'</span>]: file.<span class="fn">append</span>(n[<span class="st">'sad'</span>])</pre>
+
+<h4>Fonctions utilitaires classiques</h4>
+<pre><span class="kw">def</span> <span class="fn">taille</span>(a):
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="nu">0</span>
+    <span class="kw">return</span> <span class="nu">1</span> <span class="op">+</span> <span class="fn">taille</span>(a[<span class="st">'sag'</span>]) <span class="op">+</span> <span class="fn">taille</span>(a[<span class="st">'sad'</span>])
+
+<span class="kw">def</span> <span class="fn">hauteur</span>(a):
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="op">-</span><span class="nu">1</span>
+    <span class="kw">return</span> <span class="nu">1</span> <span class="op">+</span> <span class="fn">max</span>(<span class="fn">hauteur</span>(a[<span class="st">'sag'</span>]), <span class="fn">hauteur</span>(a[<span class="st">'sad'</span>]))
+
+<span class="kw">def</span> <span class="fn">somme</span>(a):
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="nu">0</span>
+    <span class="kw">return</span> a[<span class="st">"valeur"</span>] <span class="op">+</span> <span class="fn">somme</span>(a[<span class="st">"sag"</span>]) <span class="op">+</span> <span class="fn">somme</span>(a[<span class="st">"sad"</span>])
+
+<span class="kw">def</span> <span class="fn">nb_feuilles</span>(a):
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="nu">0</span>
+    <span class="kw">if</span> a[<span class="st">'sag'</span>] <span class="kw">is</span> <span class="kw">None</span> <span class="kw">and</span> a[<span class="st">'sad'</span>] <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="nu">1</span>
+    <span class="kw">return</span> <span class="fn">nb_feuilles</span>(a[<span class="st">'sag'</span>]) <span class="op">+</span> <span class="fn">nb_feuilles</span>(a[<span class="st">'sad'</span>])</pre>
+
+<!-- ================================================================= -->
+<!--               1.4 ABR                                             -->
+<!-- ================================================================= -->
+
+<h3 id="abr">1.4 ABR (Arbre Binaire de Recherche)</h3>
+<div class="box box-def">
+  <div class="box-label">Propriete</div>
+  <p>Pour chaque noeud : <strong>toutes les valeurs du sous-arbre gauche &lt; racine &lt; toutes les valeurs du sous-arbre droit</strong>. Recherche en <strong>O(log n)</strong> si equilibre, <strong>O(n)</strong> si degenere.</p>
+</div>
+
+<h4>Exemple d'ABR avec recherche de la valeur 13</h4>
+<div class="diagram">
+  <svg viewBox="0 0 400 240" width="400">
+    <!-- Edges -->
+    <line x1="200" y1="35" x2="120" y2="85" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="200" y1="35" x2="300" y2="85" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="120" y1="85" x2="70" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="120" y1="85" x2="160" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="300" y1="85" x2="250" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="300" y1="85" x2="350" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="70" y1="140" x2="45" y2="195" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="160" y1="140" x2="140" y2="195" stroke="#cbd5e1" stroke-width="2"/>
+    <!-- Search path arrows -->
+    <line x1="212" y1="42" x2="290" y2="78" stroke="#ef4444" stroke-width="3" stroke-dasharray="6,3"/>
+    <line x1="290" y1="92" x2="255" y2="133" stroke="#ef4444" stroke-width="3" stroke-dasharray="6,3"/>
+    <!-- Nodes -->
+    <circle cx="200" cy="35" r="17" fill="#3b82f6"/>
+    <text x="200" y="40" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12" font-weight="600">10</text>
+    <circle cx="120" cy="85" r="17" fill="#475569"/>
+    <text x="120" y="90" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">5</text>
+    <circle cx="300" cy="85" r="17" fill="#ef4444"/>
+    <text x="300" y="90" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">15</text>
+    <circle cx="70" cy="140" r="15" fill="#475569"/>
+    <text x="70" y="145" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">3</text>
+    <circle cx="160" cy="140" r="15" fill="#475569"/>
+    <text x="160" y="145" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">7</text>
+    <circle cx="250" cy="140" r="15" fill="#ef4444"/>
+    <text x="250" y="145" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">13</text>
+    <circle cx="350" cy="140" r="15" fill="#64748b"/>
+    <text x="350" y="145" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">20</text>
+    <circle cx="45" cy="195" r="13" fill="#64748b"/>
+    <text x="45" y="200" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">1</text>
+    <circle cx="140" cy="195" r="13" fill="#64748b"/>
+    <text x="140" y="200" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">6</text>
+    <!-- Labels -->
+    <text x="240" y="55" fill="#ef4444" font-size="9" font-weight="700" font-family="Inter">13 &gt; 10 : droite</text>
+    <text x="255" y="118" fill="#ef4444" font-size="9" font-weight="700" font-family="Inter">13 &lt; 15 : gauche</text>
+    <text x="250" y="165" fill="#ef4444" font-size="9" font-weight="700" font-family="Inter">Trouve !</text>
+  </svg>
+  <p class="diagram-cap">ABR : recherche de 13. Chemin en rouge : 10 &rarr; 15 &rarr; 13 (3 comparaisons)</p>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Infixe d'un ABR = valeurs triees</div>
+  <p>L'infixe (GRD) de cet ABR donne : 1, 3, 5, 6, 7, 10, 13, 15, 20 -- ordre croissant garanti. C'est une propriete fondamentale de l'ABR : le parcours infixe visite d'abord tout le sous-arbre gauche (valeurs plus petites), puis la racine, puis le sous-arbre droit (valeurs plus grandes). Cela produit <strong>toujours</strong> un ordre trie croissant.</p>
+</div>
+
+<pre><span class="kw">def</span> <span class="fn">recherche_abr</span>(a, val):
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="kw">False</span>
+    <span class="kw">if</span> val <span class="op">==</span> a[<span class="st">'valeur'</span>]: <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">if</span> val <span class="op">&lt;</span> a[<span class="st">'valeur'</span>]: <span class="kw">return</span> <span class="fn">recherche_abr</span>(a[<span class="st">'sag'</span>], val)
+    <span class="kw">return</span> <span class="fn">recherche_abr</span>(a[<span class="st">'sad'</span>], val)
+
+<span class="kw">def</span> <span class="fn">insertion_abr</span>(a, val):
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> {<span class="st">'valeur'</span>: val, <span class="st">'sag'</span>: <span class="kw">None</span>, <span class="st">'sad'</span>: <span class="kw">None</span>}
+    <span class="kw">if</span> val <span class="op">&lt;</span> a[<span class="st">'valeur'</span>]: a[<span class="st">'sag'</span>] <span class="op">=</span> <span class="fn">insertion_abr</span>(a[<span class="st">'sag'</span>], val)
+    <span class="kw">elif</span> val <span class="op">&gt;</span> a[<span class="st">'valeur'</span>]: a[<span class="st">'sad'</span>] <span class="op">=</span> <span class="fn">insertion_abr</span>(a[<span class="st">'sad'</span>], val)
+    <span class="kw">return</span> a</pre>
+
+<h4>Minimum et Maximum dans un ABR</h4>
+<div class="box box-info">
+  <div class="box-label">Principe</div>
+  <p>Le <strong>minimum</strong> d'un ABR se trouve en allant toujours a gauche jusqu'a la feuille la plus a gauche. Le <strong>maximum</strong> se trouve en allant toujours a droite. Complexite : O(h) ou h est la hauteur de l'arbre.</p>
+</div>
+
+<pre><span class="kw">def</span> <span class="fn">minimum_abr</span>(a):
+    <span class="cm"># Le minimum est le noeud le plus a gauche</span>
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="kw">None</span>
+    <span class="kw">if</span> a[<span class="st">'sag'</span>] <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> a[<span class="st">'valeur'</span>]
+    <span class="kw">return</span> <span class="fn">minimum_abr</span>(a[<span class="st">'sag'</span>])
+
+<span class="kw">def</span> <span class="fn">maximum_abr</span>(a):
+    <span class="cm"># Le maximum est le noeud le plus a droite</span>
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="kw">None</span>
+    <span class="kw">if</span> a[<span class="st">'sad'</span>] <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> a[<span class="st">'valeur'</span>]
+    <span class="kw">return</span> <span class="fn">maximum_abr</span>(a[<span class="st">'sad'</span>])</pre>
+
+<h4>L'ordre d'insertion change la forme de l'ABR</h4>
+<p>Memes valeurs <strong>{1, 2, 3, 4, 5}</strong> inserees dans deux ordres differents :</p>
+
+<div class="card-grid">
+  <div class="diagram">
+    <svg viewBox="0 0 200 200" width="200">
+      <!-- Balanced: insert 3, 1, 5, 2, 4 -->
+      <line x1="100" y1="30" x2="55" y2="80" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="100" y1="30" x2="145" y2="80" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="55" y1="80" x2="80" y2="135" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="145" y1="80" x2="120" y2="135" stroke="#cbd5e1" stroke-width="2"/>
+      <circle cx="100" cy="30" r="15" fill="#3b82f6"/>
+      <text x="100" y="35" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12" font-weight="600">3</text>
+      <circle cx="55" cy="80" r="14" fill="#475569"/>
+      <text x="55" y="85" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">1</text>
+      <circle cx="145" cy="80" r="14" fill="#475569"/>
+      <text x="145" y="85" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">5</text>
+      <circle cx="80" cy="135" r="13" fill="#64748b"/>
+      <text x="80" y="140" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">2</text>
+      <circle cx="120" cy="135" r="13" fill="#64748b"/>
+      <text x="120" y="140" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">4</text>
+      <text x="100" y="170" text-anchor="middle" fill="#16a34a" font-size="10" font-weight="700" font-family="Inter">Equilibre : h = 2</text>
+      <text x="100" y="185" text-anchor="middle" fill="#888" font-size="9" font-family="Inter">Insertion : 3, 1, 5, 2, 4</text>
+    </svg>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 200 250" width="160">
+      <!-- Degenerate: insert 1, 2, 3, 4, 5 -->
+      <line x1="50" y1="25" x2="70" y2="65" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="70" y1="65" x2="90" y2="105" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="90" y1="105" x2="110" y2="145" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="110" y1="145" x2="130" y2="185" stroke="#cbd5e1" stroke-width="2"/>
+      <circle cx="50" cy="25" r="13" fill="#3b82f6"/>
+      <text x="50" y="30" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10" font-weight="600">1</text>
+      <circle cx="70" cy="65" r="12" fill="#475569"/>
+      <text x="70" y="69" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">2</text>
+      <circle cx="90" cy="105" r="12" fill="#475569"/>
+      <text x="90" y="109" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">3</text>
+      <circle cx="110" cy="145" r="12" fill="#475569"/>
+      <text x="110" y="149" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">4</text>
+      <circle cx="130" cy="185" r="12" fill="#64748b"/>
+      <text x="130" y="189" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">5</text>
+      <text x="100" y="215" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="700" font-family="Inter">Degenere : h = 4</text>
+      <text x="100" y="230" text-anchor="middle" fill="#888" font-size="9" font-family="Inter">Insertion : 1, 2, 3, 4, 5</text>
+    </svg>
+  </div>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Attention</div>
+  <p>Memes valeurs {1,2,3,4,5} mais l'ordre d'insertion change tout. A gauche : insertion 3,1,5,2,4 donne un arbre equilibre, recherche O(log n). A droite : insertion 1,2,3,4,5 (ordre croissant) donne un arbre degenere en liste chainee, recherche O(n). C'est pourquoi en pratique on utilise des ABR equilibres (AVL, arbres rouge-noir) pour garantir h = O(log n).</p>
+</div>
+
+<!-- ================================================================= -->
+<!--               1.5 TAS                                             -->
+<!-- ================================================================= -->
+
+<h3 id="tas">1.5 Tas (Heap)</h3>
+
+<div class="box box-def">
+  <div class="box-label">Definition</div>
+  <p><strong>Tas max :</strong> arbre binaire <strong>complet</strong> ou chaque pere est <strong>superieur ou egal</strong> a ses fils. Le maximum est toujours a la racine. Un <strong>tas min</strong> est l'inverse (pere &le; fils, minimum a la racine).</p>
+</div>
+
+<h4>Correspondance arbre / tableau</h4>
+<p>Un tas se stocke dans un <strong>tableau</strong> (sans pointeurs). C'est possible car l'arbre est complet : il n'y a pas de "trous". Pour un noeud a l'indice <code>i</code> (en commencant a 0) :</p>
+
+<div class="card-grid">
+  <div class="card">
+    <div class="card-title">Formules d'indexation</div>
+    <ul>
+      <li><strong>Racine</strong> = indice <code>0</code></li>
+      <li><strong>Fils gauche</strong> de i = <code>2*i + 1</code></li>
+      <li><strong>Fils droit</strong> de i = <code>2*i + 2</code></li>
+      <li><strong>Pere</strong> de i = <code>(i - 1) // 2</code></li>
+      <li><strong>Dernier noeud interne</strong> = <code>n//2 - 1</code></li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">Exemple concret</div>
+    <p>Tableau : <code>[50, 30, 40, 10, 20, 35, 5, 8]</code></p>
+    <ul>
+      <li>Racine : T[0] = 50</li>
+      <li>Fils gauche de T[0] : T[1] = 30</li>
+      <li>Fils droit de T[0] : T[2] = 40</li>
+      <li>Pere de T[5] : T[(5-1)//2] = T[2] = 40</li>
+      <li>Fils de T[3]=10 : T[7]=8, T[8] n'existe pas</li>
+    </ul>
+  </div>
+</div>
+
+<div class="diagram">
+  <svg viewBox="0 0 440 280" width="440">
+    <!-- Tree edges -->
+    <line x1="220" y1="35" x2="130" y2="85" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="220" y1="35" x2="310" y2="85" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="130" y1="85" x2="80" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="130" y1="85" x2="175" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="310" y1="85" x2="265" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="310" y1="85" x2="355" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="80" y1="140" x2="55" y2="190" stroke="#cbd5e1" stroke-width="2"/>
+    <!-- Tree nodes -->
+    <circle cx="220" cy="35" r="17" fill="#3b82f6"/>
+    <text x="220" y="40" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">50</text>
+    <text x="220" y="16" text-anchor="middle" fill="#888" font-size="8" font-family="Inter">i=0</text>
+    <circle cx="130" cy="85" r="16" fill="#475569"/>
+    <text x="130" y="90" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">30</text>
+    <text x="130" y="68" text-anchor="middle" fill="#888" font-size="8" font-family="Inter">i=1</text>
+    <circle cx="310" cy="85" r="16" fill="#475569"/>
+    <text x="310" y="90" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">40</text>
+    <text x="310" y="68" text-anchor="middle" fill="#888" font-size="8" font-family="Inter">i=2</text>
+    <circle cx="80" cy="140" r="15" fill="#475569"/>
+    <text x="80" y="145" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">10</text>
+    <text x="80" y="125" text-anchor="middle" fill="#888" font-size="8" font-family="Inter">i=3</text>
+    <circle cx="175" cy="140" r="15" fill="#64748b"/>
+    <text x="175" y="145" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">20</text>
+    <text x="175" y="125" text-anchor="middle" fill="#888" font-size="8" font-family="Inter">i=4</text>
+    <circle cx="265" cy="140" r="15" fill="#64748b"/>
+    <text x="265" y="145" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">35</text>
+    <text x="265" y="125" text-anchor="middle" fill="#888" font-size="8" font-family="Inter">i=5</text>
+    <circle cx="355" cy="140" r="15" fill="#64748b"/>
+    <text x="355" y="145" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">5</text>
+    <text x="355" y="125" text-anchor="middle" fill="#888" font-size="8" font-family="Inter">i=6</text>
+    <circle cx="55" cy="190" r="13" fill="#64748b"/>
+    <text x="55" y="195" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">8</text>
+    <text x="55" y="177" text-anchor="middle" fill="#888" font-size="8" font-family="Inter">i=7</text>
+
+    <!-- Array below -->
+    <rect x="20" y="225" width="50" height="30" fill="#3b82f6" rx="3"/>
+    <text x="45" y="244" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11" font-weight="600">50</text>
+    <text x="45" y="268" text-anchor="middle" fill="#888" font-size="9" font-family="JetBrains Mono">[0]</text>
+
+    <rect x="75" y="225" width="50" height="30" fill="#475569" rx="3"/>
+    <text x="100" y="244" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">30</text>
+    <text x="100" y="268" text-anchor="middle" fill="#888" font-size="9" font-family="JetBrains Mono">[1]</text>
+
+    <rect x="130" y="225" width="50" height="30" fill="#475569" rx="3"/>
+    <text x="155" y="244" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">40</text>
+    <text x="155" y="268" text-anchor="middle" fill="#888" font-size="9" font-family="JetBrains Mono">[2]</text>
+
+    <rect x="185" y="225" width="50" height="30" fill="#475569" rx="3"/>
+    <text x="210" y="244" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">10</text>
+    <text x="210" y="268" text-anchor="middle" fill="#888" font-size="9" font-family="JetBrains Mono">[3]</text>
+
+    <rect x="240" y="225" width="50" height="30" fill="#64748b" rx="3"/>
+    <text x="265" y="244" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">20</text>
+    <text x="265" y="268" text-anchor="middle" fill="#888" font-size="9" font-family="JetBrains Mono">[4]</text>
+
+    <rect x="295" y="225" width="50" height="30" fill="#64748b" rx="3"/>
+    <text x="320" y="244" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">35</text>
+    <text x="320" y="268" text-anchor="middle" fill="#888" font-size="9" font-family="JetBrains Mono">[5]</text>
+
+    <rect x="350" y="225" width="50" height="30" fill="#64748b" rx="3"/>
+    <text x="375" y="244" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">5</text>
+    <text x="375" y="268" text-anchor="middle" fill="#888" font-size="9" font-family="JetBrains Mono">[6]</text>
+
+    <!-- Arrows tree -> array -->
+    <line x1="220" y1="52" x2="45" y2="222" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+    <line x1="130" y1="101" x2="100" y2="222" stroke="#475569" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+    <line x1="310" y1="101" x2="155" y2="222" stroke="#475569" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  </svg>
+  <p class="diagram-cap">Tas max : vue arbre (haut) et vue tableau (bas). Les lignes pointillees montrent la correspondance.</p>
+</div>
+
+<h4>Descendre (Sift-Down / Heapify)</h4>
+<p>Pour maintenir la propriete du tas apres modification, on <strong>tamise</strong> l'element vers le bas en l'echangeant avec son plus grand fils tant qu'il est plus petit. C'est l'operation fondamentale du tas.</p>
+
+<div class="box box-info">
+  <div class="box-label">Principe de descendre</div>
+  <p>On compare le noeud a l'indice <code>i</code> avec ses deux fils. Si l'un des fils est plus grand, on echange le noeud avec le <strong>plus grand des deux fils</strong>, puis on continue recursivement a la nouvelle position. On s'arrete quand le noeud est plus grand que ses deux fils, ou quand on atteint une feuille.</p>
+</div>
+
+<pre><span class="kw">def</span> <span class="fn">descendre</span>(T, n, i):
+    <span class="cm"># Tamise T[i] vers le bas dans un tas de taille n</span>
+    plus_grand = i
+    g = <span class="nu">2</span> <span class="op">*</span> i <span class="op">+</span> <span class="nu">1</span>    <span class="cm"># fils gauche</span>
+    d = <span class="nu">2</span> <span class="op">*</span> i <span class="op">+</span> <span class="nu">2</span>    <span class="cm"># fils droit</span>
+    <span class="kw">if</span> g <span class="op">&lt;</span> n <span class="kw">and</span> T[g] <span class="op">&gt;</span> T[plus_grand]:
+        plus_grand = g
+    <span class="kw">if</span> d <span class="op">&lt;</span> n <span class="kw">and</span> T[d] <span class="op">&gt;</span> T[plus_grand]:
+        plus_grand = d
+    <span class="kw">if</span> plus_grand <span class="op">!=</span> i:
+        T[i], T[plus_grand] = T[plus_grand], T[i]
+        <span class="fn">descendre</span>(T, n, plus_grand)  <span class="cm"># continuer a descendre</span></pre>
+
+<h4>Construire un tas</h4>
+<div class="box box-def">
+  <div class="box-label">Pourquoi partir de n//2 - 1 ?</div>
+  <p>Les elements d'indice <code>n//2</code> a <code>n-1</code> sont des <strong>feuilles</strong> : ils n'ont pas de fils, donc ils satisfont deja la propriete du tas (trivialement). On commence donc par le <strong>dernier noeud interne</strong> (<code>n//2 - 1</code>) et on remonte vers la racine, en appliquant <code>descendre</code> a chaque noeud. Complexite : <strong>O(n)</strong> (et non O(n log n) car les noeuds proches des feuilles descendent peu).</p>
+</div>
+
+<pre><span class="kw">def</span> <span class="fn">construire_tas</span>(T):
+    n = <span class="fn">len</span>(T)
+    <span class="cm"># Partir du dernier noeud interne, remonter vers la racine</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n <span class="op">//</span> <span class="nu">2</span> <span class="op">-</span> <span class="nu">1</span>, <span class="op">-</span><span class="nu">1</span>, <span class="op">-</span><span class="nu">1</span>):
+        <span class="fn">descendre</span>(T, n, i)</pre>
+
+<h4>Tri par tas (Heapsort)</h4>
+<div class="box box-tip">
+  <div class="box-label">Principe du tri par tas</div>
+  <p>Le tri par tas fonctionne en 2 phases :</p>
+  <ol>
+    <li><strong>Construire le tas max</strong> a partir du tableau (O(n))</li>
+    <li><strong>Extraire le maximum</strong> repetitivement : echanger T[0] (le max) avec le dernier element, reduire la taille du tas de 1, puis <code>descendre(T, nouvelle_taille, 0)</code> pour restaurer la propriete. Repeter n-1 fois.</li>
+  </ol>
+  <p>A chaque etape, le maximum est place a sa position finale (fin du tableau). Complexite totale : <strong>O(n log n)</strong>, en place, non stable.</p>
+</div>
+
+<pre><span class="kw">def</span> <span class="fn">tri_par_tas</span>(T):
+    n = <span class="fn">len</span>(T)
+    <span class="fn">construire_tas</span>(T)            <span class="cm"># Phase 1 : construire le tas max</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n <span class="op">-</span> <span class="nu">1</span>, <span class="nu">0</span>, <span class="op">-</span><span class="nu">1</span>):
+        T[<span class="nu">0</span>], T[i] = T[i], T[<span class="nu">0</span>]  <span class="cm"># Phase 2 : echanger max avec dernier</span>
+        <span class="fn">descendre</span>(T, i, <span class="nu">0</span>)        <span class="cm"># restaurer le tas (taille reduite)</span></pre>
+
+<div class="box box-warn">
+  <div class="box-label">Tas != ABR</div>
+  <p>Ne pas confondre : un tas garantit seulement pere &ge; fils (pas de relation gauche/droite). Un ABR garantit gauche &lt; racine &lt; droite. Un tas ne donne pas un parcours trie, un ABR si (infixe).</p>
+</div>
+
+<!-- ================================================================= -->
+<!--               1.6 ARBRE D'EXPRESSION                             -->
+<!-- ================================================================= -->
+
+<h3>1.6 Arbre d'expression arithmetique</h3>
+<p>Une expression comme <code>(3 - (5+4)*(5-1))</code> se represente en arbre : les <strong>operateurs</strong> sont les noeuds internes, les <strong>nombres</strong> sont les feuilles.</p>
+
+<div class="diagram">
+  <svg viewBox="0 0 380 220" width="380">
+    <!-- Edges -->
+    <line x1="190" y1="30" x2="90" y2="80" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="190" y1="30" x2="270" y2="80" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="270" y1="80" x2="190" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="270" y1="80" x2="340" y2="140" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="190" y1="140" x2="155" y2="195" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="190" y1="140" x2="225" y2="195" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="340" y1="140" x2="305" y2="195" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="340" y1="140" x2="370" y2="195" stroke="#cbd5e1" stroke-width="2"/>
+    <!-- Nodes -->
+    <circle cx="190" cy="30" r="17" fill="#3b82f6"/>
+    <text x="190" y="36" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="14" font-weight="700">-</text>
+    <circle cx="90" cy="80" r="15" fill="#64748b"/>
+    <text x="90" y="85" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12" font-weight="600">3</text>
+    <circle cx="270" cy="80" r="17" fill="#475569"/>
+    <text x="270" y="86" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="14" font-weight="700">*</text>
+    <circle cx="190" cy="140" r="16" fill="#475569"/>
+    <text x="190" y="146" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="14" font-weight="700">+</text>
+    <circle cx="340" cy="140" r="16" fill="#475569"/>
+    <text x="340" y="146" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="14" font-weight="700">-</text>
+    <circle cx="155" cy="195" r="14" fill="#64748b"/>
+    <text x="155" y="200" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">5</text>
+    <circle cx="225" cy="195" r="14" fill="#64748b"/>
+    <text x="225" y="200" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">4</text>
+    <circle cx="305" cy="195" r="14" fill="#64748b"/>
+    <text x="305" y="200" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">5</text>
+    <circle cx="370" cy="195" r="14" fill="#64748b"/>
+    <text x="370" y="200" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">1</text>
+  </svg>
+  <p class="diagram-cap">Arbre d'expression pour (3 - (5+4)*(5-1)) = 3 - 36 = -33</p>
+</div>
+
+<div class="card">
+  <div class="card-title">Parcours de l'arbre d'expression</div>
+  <p><strong>Prefixe :</strong> -, 3, *, +, 5, 4, -, 5, 1 &nbsp;(notation polonaise)</p>
+  <p><strong>Infixe :</strong> 3, -, 5, +, 4, *, 5, -, 1 &nbsp;(lecture naturelle, sans parentheses)</p>
+  <p><strong>Postfixe :</strong> 3, 5, 4, +, 5, 1, -, *, - &nbsp;(notation polonaise inverse -- calculatrices HP)</p>
+</div>
+
+<!-- ================================================================= -->
+<!--               1.7 TRIES                                           -->
+<!-- ================================================================= -->
+
+<h3 id="tries">1.7 Trie (arbre de prefixes)</h3>
+
+<div class="box box-def">
+  <div class="box-label">Definition</div>
+  <p>Un <strong>trie</strong> est un arbre n-aire ou chaque arete represente un caractere. On l'utilise pour stocker un dictionnaire de mots. Recherche en <strong>O(longueur du mot)</strong>, independant du nombre de mots stockes.</p>
+</div>
+
+<div class="box box-info">
+  <div class="box-label">Pourquoi O(longueur du mot) ?</div>
+  <p>Pour chercher un mot de longueur m, on descend dans le trie en suivant une branche par caractere. A chaque niveau, on fait une seule comparaison (ou un acces dictionnaire en O(1)). On descend exactement m niveaux. Donc la complexite est <strong>O(m)</strong>, totalement independante du nombre de mots dans le trie ! C'est bien meilleur qu'une recherche dans une liste triee (O(m log n)) ou qu'un parcours lineaire (O(n * m)).</p>
+</div>
+
+<div class="diagram">
+  <svg viewBox="0 0 400 280" width="400">
+    <!-- Root -->
+    <circle cx="200" cy="25" r="14" fill="#3b82f6"/>
+    <text x="200" y="30" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10" font-weight="600">*</text>
+
+    <!-- Level 1: a, v -->
+    <line x1="200" y1="39" x2="140" y2="72" stroke="#94a3b8" stroke-width="2"/>
+    <text x="162" y="52" fill="#475569" font-family="JetBrains Mono" font-size="11" font-weight="600">a</text>
+    <circle cx="140" cy="80" r="14" fill="#16a34a" stroke="#16a34a" stroke-width="2"/>
+    <text x="140" y="85" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10" font-weight="700">a</text>
+
+    <line x1="200" y1="39" x2="320" y2="72" stroke="#94a3b8" stroke-width="2"/>
+    <text x="268" y="52" fill="#475569" font-family="JetBrains Mono" font-size="11" font-weight="600">v</text>
+    <circle cx="320" cy="80" r="14" fill="#475569"/>
+    <text x="320" y="85" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">v</text>
+
+    <!-- Level 2 from 'a': n, r -->
+    <line x1="140" y1="94" x2="90" y2="130" stroke="#94a3b8" stroke-width="2"/>
+    <text x="108" y="110" fill="#475569" font-family="JetBrains Mono" font-size="11" font-weight="600">n</text>
+    <circle cx="90" cy="138" r="14" fill="#16a34a" stroke="#16a34a" stroke-width="2"/>
+    <text x="90" y="143" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10" font-weight="700">n</text>
+
+    <line x1="140" y1="94" x2="200" y2="130" stroke="#94a3b8" stroke-width="2"/>
+    <text x="176" y="110" fill="#475569" font-family="JetBrains Mono" font-size="11" font-weight="600">r</text>
+    <circle cx="200" cy="138" r="14" fill="#475569"/>
+    <text x="200" y="143" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">r</text>
+
+    <!-- Level 2 from 'v': a -->
+    <line x1="320" y1="94" x2="320" y2="130" stroke="#94a3b8" stroke-width="2"/>
+    <text x="330" y="115" fill="#475569" font-family="JetBrains Mono" font-size="11" font-weight="600">a</text>
+    <circle cx="320" cy="138" r="14" fill="#16a34a" stroke="#16a34a" stroke-width="2"/>
+    <text x="320" y="143" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10" font-weight="700">a</text>
+
+    <!-- Level 3 from 'n': t -->
+    <line x1="90" y1="152" x2="60" y2="188" stroke="#94a3b8" stroke-width="2"/>
+    <text x="68" y="170" fill="#475569" font-family="JetBrains Mono" font-size="11" font-weight="600">t</text>
+    <circle cx="60" cy="196" r="14" fill="#475569"/>
+    <text x="60" y="201" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">t</text>
+
+    <!-- Level 3 from 'r': t -->
+    <line x1="200" y1="152" x2="200" y2="188" stroke="#94a3b8" stroke-width="2"/>
+    <text x="210" y="175" fill="#475569" font-family="JetBrains Mono" font-size="11" font-weight="600">t</text>
+    <circle cx="200" cy="196" r="14" fill="#16a34a" stroke="#16a34a" stroke-width="2"/>
+    <text x="200" y="201" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10" font-weight="700">t</text>
+
+    <!-- Level 4 from 't' (anti): i -->
+    <line x1="60" y1="210" x2="60" y2="244" stroke="#94a3b8" stroke-width="2"/>
+    <text x="70" y="232" fill="#475569" font-family="JetBrains Mono" font-size="11" font-weight="600">i</text>
+    <circle cx="60" cy="252" r="14" fill="#16a34a" stroke="#16a34a" stroke-width="2"/>
+    <text x="60" y="257" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10" font-weight="700">i</text>
+
+    <!-- Legend -->
+    <circle cx="280" cy="215" r="8" fill="#16a34a"/>
+    <text x="295" y="219" fill="#666" font-size="9" font-family="Inter">= fin de mot</text>
+    <circle cx="280" cy="235" r="8" fill="#475569"/>
+    <text x="295" y="239" fill="#666" font-size="9" font-family="Inter">= prefixe seulement</text>
+  </svg>
+  <p class="diagram-cap">Trie contenant {a, an, anti, art, va}. Les noeuds verts marquent une fin de mot.</p>
+</div>
+
+<h4>Algorithme de recherche dans un trie</h4>
+<p>Pour chercher un mot, on descend dans le trie caractere par caractere. A chaque niveau, on cherche le fils correspondant au caractere courant. Si on ne le trouve pas, le mot n'est pas dans le trie. Si on arrive au bout du mot, on verifie que le noeud courant est marque comme fin de mot.</p>
+
+<pre><span class="cm"># Representation : chaque noeud = {"fin": bool, "fils": {lettre: noeud}}</span>
+
+<span class="kw">def</span> <span class="fn">recherche_trie</span>(racine, mot):
+    <span class="cm">"""Cherche si mot est dans le trie. O(len(mot))"""</span>
+    noeud = racine
+    <span class="kw">for</span> c <span class="kw">in</span> mot:
+        <span class="kw">if</span> c <span class="kw">not in</span> noeud[<span class="st">"fils"</span>]:
+            <span class="kw">return</span> <span class="kw">False</span>   <span class="cm"># caractere non trouve, mot absent</span>
+        noeud = noeud[<span class="st">"fils"</span>][c]
+    <span class="kw">return</span> noeud[<span class="st">"fin"</span>]       <span class="cm"># True seulement si c'est un mot complet</span>
+
+<span class="kw">def</span> <span class="fn">inserer_trie</span>(racine, mot):
+    <span class="cm">"""Insere un mot dans le trie. O(len(mot))"""</span>
+    noeud = racine
+    <span class="kw">for</span> c <span class="kw">in</span> mot:
+        <span class="kw">if</span> c <span class="kw">not in</span> noeud[<span class="st">"fils"</span>]:
+            noeud[<span class="st">"fils"</span>][c] = {<span class="st">"fin"</span>: <span class="kw">False</span>, <span class="st">"fils"</span>: {}}
+        noeud = noeud[<span class="st">"fils"</span>][c]
+    noeud[<span class="st">"fin"</span>] = <span class="kw">True</span></pre>
+
+<div class="box box-tip">
+  <div class="box-label">Attention a la difference prefixe / mot complet</div>
+  <p>Chercher "an" dans le trie {a, an, anti, art, va} retourne <strong>True</strong> car "an" est marque comme fin de mot. Mais chercher "ant" retourne <strong>False</strong> : le noeud 't' apres "an" existe (pour "anti") mais n'est pas marque comme fin de mot.</p>
+</div>
+
+<hr>
+
+<!-- ================================================================= -->
+<!--               II. GRAPHES                                         -->
+<!-- ================================================================= -->
+
+<h2 id="graphes"><span class="badge badge-graph">GRAPHES</span> II. Graphes</h2>
+
+<h3>2.1 Vocabulaire</h3>
+
+<div class="box box-info">
+  <div class="box-label">Analogies concretes</div>
+  <p><strong>Graphe oriente</strong> = reseau de rues a sens unique. Chaque arc a une direction : on peut aller de A vers B mais pas forcement de B vers A. Exemple : Twitter (suivre quelqu'un est unilateral).</p>
+  <p><strong>Graphe non oriente</strong> = reseau de routes bidirectionnelles. Chaque arete relie les deux sommets dans les deux sens. Exemple : Facebook (l'amitie est bilaterale).</p>
+</div>
+
+<div class="card-grid">
+  <div class="card">
+    <ul>
+      <li><strong>Sommet</strong> -- element du graphe</li>
+      <li><strong>Arc</strong> -- lien oriente / <strong>Arete</strong> -- lien non oriente</li>
+      <li><strong>Voisin</strong> -- sommet directement relie</li>
+      <li><strong>Boucle</strong> -- arc vers soi-meme</li>
+      <li><strong>Degre</strong> -- nombre d'aretes incidentes a un sommet</li>
+    </ul>
+  </div>
+  <div class="card">
+    <ul>
+      <li><strong>Connexe</strong> -- en un seul bloc</li>
+      <li><strong>Complet</strong> -- tout relie a tout</li>
+      <li><strong>Pondere</strong> -- poids sur les aretes</li>
+      <li><strong>Non oriente</strong> &rarr; matrice <strong>symetrique</strong></li>
+      <li><strong>Chemin</strong> -- suite de sommets relies par des aretes</li>
+      <li><strong>Cycle</strong> -- chemin qui revient au sommet de depart</li>
+    </ul>
+  </div>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Nombre maximal d'aretes</div>
+  <p><strong>Graphe non oriente</strong> (sans boucle) : chaque paire de sommets peut avoir au plus 1 arete. Il y a C(n,2) = <strong>n(n-1)/2</strong> paires. Exemple : 4 sommets &rarr; max 6 aretes.</p>
+  <p><strong>Graphe oriente</strong> (sans boucle) : chaque paire ordonnee peut avoir 1 arc. Il y a n(n-1) paires ordonnees = <strong>n(n-1)</strong> arcs max. Exemple : 4 sommets &rarr; max 12 arcs.</p>
+</div>
+
+<h4>Graphe oriente (arcs avec fleches)</h4>
+<div class="diagram">
+  <svg viewBox="0 0 300 220" width="300">
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/>
+      </marker>
+    </defs>
+    <!-- Arcs (directed) -->
+    <line x1="85" y1="55" x2="207" y2="55" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="75" y1="68" x2="75" y2="147" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="225" y1="68" x2="225" y2="147" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="88" y1="160" x2="207" y2="160" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="215" y1="148" x2="88" y2="66" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <!-- Nodes -->
+    <circle cx="75" cy="55" r="18" fill="#3b82f6"/>
+    <text x="75" y="60" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">0</text>
+    <circle cx="225" cy="55" r="18" fill="#475569"/>
+    <text x="225" y="60" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">1</text>
+    <circle cx="75" cy="160" r="18" fill="#475569"/>
+    <text x="75" y="165" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">2</text>
+    <circle cx="225" cy="160" r="18" fill="#475569"/>
+    <text x="225" y="165" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">3</text>
+    <!-- Labels -->
+    <text x="150" y="195" text-anchor="middle" fill="#888" font-size="9" font-family="Inter">Arcs : 0&rarr;1, 0&rarr;2, 2&rarr;3, 1&rarr;3, 3&rarr;0</text>
+  </svg>
+  <p class="diagram-cap">Graphe oriente a 4 sommets : les fleches indiquent le sens des arcs</p>
+</div>
+
+<h4>Representations du graphe oriente</h4>
+<div class="card-grid">
+<div class="card">
+  <div class="card-title">Matrice d'adjacence (oriente)</div>
+  <p>M[i][j] = 1 si arc de i vers j. <strong>Non symetrique</strong> en general.</p>
+<pre><span class="cm">#     0  1  2  3</span>
+M = [[<span class="nu">0</span>,<span class="nu">1</span>,<span class="nu">1</span>,<span class="nu">0</span>],  <span class="cm"># 0 &rarr; 1,2</span>
+     [<span class="nu">0</span>,<span class="nu">0</span>,<span class="nu">0</span>,<span class="nu">1</span>],  <span class="cm"># 1 &rarr; 3</span>
+     [<span class="nu">0</span>,<span class="nu">0</span>,<span class="nu">0</span>,<span class="nu">1</span>],  <span class="cm"># 2 &rarr; 3</span>
+     [<span class="nu">1</span>,<span class="nu">0</span>,<span class="nu">0</span>,<span class="nu">0</span>]]  <span class="cm"># 3 &rarr; 0</span></pre>
+</div>
+<div class="card">
+  <div class="card-title">Liste d'adjacence (oriente)</div>
+  <p>L[i] = sommets atteignables depuis i (successeurs).</p>
+<pre>L = [[<span class="nu">1</span>,<span class="nu">2</span>],  <span class="cm"># 0 &rarr; 1,2</span>
+     [<span class="nu">3</span>],     <span class="cm"># 1 &rarr; 3</span>
+     [<span class="nu">3</span>],     <span class="cm"># 2 &rarr; 3</span>
+     [<span class="nu">0</span>]]     <span class="cm"># 3 &rarr; 0</span></pre>
+</div>
+</div>
+
+<h4>Graphe non oriente (aretes sans fleches)</h4>
+<div class="diagram">
+  <svg viewBox="0 0 300 220" width="300">
+    <!-- Edges (undirected) -->
+    <line x1="75" y1="55" x2="225" y2="55" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="75" y1="55" x2="75" y2="160" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="225" y1="55" x2="225" y2="160" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="75" y1="160" x2="225" y2="160" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="75" y1="55" x2="225" y2="160" stroke="#94a3b8" stroke-width="2"/>
+    <!-- Nodes -->
+    <circle cx="75" cy="55" r="18" fill="#3b82f6"/>
+    <text x="75" y="60" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">0</text>
+    <circle cx="225" cy="55" r="18" fill="#475569"/>
+    <text x="225" y="60" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">1</text>
+    <circle cx="75" cy="160" r="18" fill="#475569"/>
+    <text x="75" y="165" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">2</text>
+    <circle cx="225" cy="160" r="18" fill="#475569"/>
+    <text x="225" y="165" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">3</text>
+    <text x="150" y="195" text-anchor="middle" fill="#888" font-size="9" font-family="Inter">Aretes : {0,1}, {0,2}, {0,3}, {1,3}, {2,3}</text>
+    <text x="150" y="208" text-anchor="middle" fill="#888" font-size="9" font-family="Inter">Matrice symetrique : M[i][j] = M[j][i]</text>
+  </svg>
+  <p class="diagram-cap">Graphe non oriente a 4 sommets : pas de sens sur les aretes</p>
+</div>
+
+<h4>Representations du graphe non oriente</h4>
+<div class="card-grid">
+<div class="card">
+  <div class="card-title">Matrice d'adjacence (non oriente)</div>
+  <p>M[i][j] = M[j][i] = 1 si arete {i,j}. Toujours <strong>symetrique</strong>.</p>
+<pre><span class="cm">#     0  1  2  3</span>
+M = [[<span class="nu">0</span>,<span class="nu">1</span>,<span class="nu">1</span>,<span class="nu">1</span>],  <span class="cm"># 0 -- 1,2,3</span>
+     [<span class="nu">1</span>,<span class="nu">0</span>,<span class="nu">0</span>,<span class="nu">1</span>],  <span class="cm"># 1 -- 0,3</span>
+     [<span class="nu">1</span>,<span class="nu">0</span>,<span class="nu">0</span>,<span class="nu">1</span>],  <span class="cm"># 2 -- 0,3</span>
+     [<span class="nu">1</span>,<span class="nu">1</span>,<span class="nu">1</span>,<span class="nu">0</span>]]  <span class="cm"># 3 -- 0,1,2</span></pre>
+</div>
+<div class="card">
+  <div class="card-title">Liste d'adjacence (non oriente)</div>
+  <p>L[i] = tous les voisins de i. Chaque arete apparait 2 fois.</p>
+<pre>L = [[<span class="nu">1</span>,<span class="nu">2</span>,<span class="nu">3</span>],  <span class="cm"># 0 -- 1,2,3</span>
+     [<span class="nu">0</span>,<span class="nu">3</span>],     <span class="cm"># 1 -- 0,3</span>
+     [<span class="nu">0</span>,<span class="nu">3</span>],     <span class="cm"># 2 -- 0,3</span>
+     [<span class="nu">0</span>,<span class="nu">1</span>,<span class="nu">2</span>]]   <span class="cm"># 3 -- 0,1,2</span></pre>
+</div>
+</div>
+
+<h4>Graphe pondere</h4>
+<div class="box box-def">
+  <div class="box-label">Representation des poids</div>
+  <p><strong>Matrice ponderee :</strong> M[i][j] = poids de l'arete entre i et j. On utilise <strong>0</strong> (ou <code>inf</code>) pour indiquer l'absence d'arete. Attention : si 0 est un poids valide, on utilise <code>float('inf')</code> a la place.</p>
+  <p><strong>Liste d'adjacence ponderee :</strong> L[i] = liste de tuples (voisin, poids). Exemple : L[0] = [(1, 6), (2, 9)] signifie arete 0-1 de poids 6, arete 0-2 de poids 9.</p>
+</div>
+
+<div class="diagram">
+  <svg viewBox="0 0 440 300" width="440">
+    <defs>
+      <marker id="arrow2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/>
+      </marker>
+    </defs>
+    <!-- Edges with weights -->
+    <line x1="90" y1="55" x2="210" y2="55" stroke="#94a3b8" stroke-width="2"/>
+    <text x="150" y="45" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">6</text>
+
+    <line x1="80" y1="68" x2="80" y2="140" stroke="#94a3b8" stroke-width="2"/>
+    <text x="65" y="110" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">4</text>
+
+    <line x1="230" y1="68" x2="310" y2="108" stroke="#94a3b8" stroke-width="2"/>
+    <text x="280" y="80" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">2</text>
+
+    <line x1="92" y1="55" x2="308" y2="115" stroke="#94a3b8" stroke-width="2"/>
+    <text x="210" y="78" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">9</text>
+
+    <line x1="80" y1="165" x2="80" y2="232" stroke="#94a3b8" stroke-width="2"/>
+    <text x="65" y="200" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">1</text>
+
+    <line x1="93" y1="155" x2="210" y2="245" stroke="#94a3b8" stroke-width="2"/>
+    <text x="140" y="210" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">5</text>
+
+    <line x1="90" y1="245" x2="210" y2="245" stroke="#94a3b8" stroke-width="2"/>
+    <text x="150" y="260" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">2</text>
+
+    <line x1="230" y1="245" x2="315" y2="130" stroke="#94a3b8" stroke-width="2"/>
+    <text x="285" y="195" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">7</text>
+
+    <line x1="320" y1="130" x2="235" y2="240" stroke="#94a3b8" stroke-width="1" stroke-dasharray="1,0" opacity="0"/>
+
+    <line x1="230" y1="55" x2="370" y2="175" stroke="#94a3b8" stroke-width="2"/>
+    <text x="315" y="110" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">3</text>
+
+    <line x1="330" y1="120" x2="370" y2="170" stroke="#94a3b8" stroke-width="2"/>
+    <text x="362" y="142" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">1</text>
+
+    <line x1="370" y1="195" x2="235" y2="245" stroke="#94a3b8" stroke-width="2"/>
+    <text x="310" y="230" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">4</text>
+
+    <!-- Nodes -->
+    <circle cx="80" cy="55" r="18" fill="#3b82f6"/>
+    <text x="80" y="60" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">0</text>
+    <circle cx="225" cy="55" r="18" fill="#475569"/>
+    <text x="225" y="60" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">1</text>
+    <circle cx="320" cy="120" r="18" fill="#475569"/>
+    <text x="320" y="125" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">2</text>
+    <circle cx="80" cy="155" r="18" fill="#475569"/>
+    <text x="80" y="160" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">3</text>
+    <circle cx="80" cy="245" r="18" fill="#475569"/>
+    <text x="80" y="250" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">4</text>
+    <circle cx="225" cy="245" r="18" fill="#475569"/>
+    <text x="225" y="250" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">5</text>
+    <circle cx="370" cy="185" r="18" fill="#475569"/>
+    <text x="370" y="190" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">6</text>
+  </svg>
+  <p class="diagram-cap">Graphe pondere a 7 sommets. Poids en rouge sur chaque arete.</p>
+</div>
+
+<div class="box box-info">
+  <div class="box-label">Quand utiliser matrice vs liste ?</div>
+  <p><strong>Matrice d'adjacence</strong> : ideale pour les graphes <strong>denses</strong> (beaucoup d'aretes, proche du complet). Acces O(1) pour tester si une arete existe. Memoire O(n^2).</p>
+  <p><strong>Liste d'adjacence</strong> : ideale pour les graphes <strong>creux</strong> (peu d'aretes). Parcours des voisins rapide. Memoire O(n + m) ou m = nombre d'aretes.</p>
+  <p>En pratique, la plupart des graphes reels (web, reseaux sociaux, routes) sont creux, donc on prefere la liste d'adjacence.</p>
+</div>
+
+<h3>2.2 Conversions et representations Python</h3>
+
+<div class="box box-tip">
+  <div class="box-label">Conversions</div>
+  <p><strong>Pleine &rarr; creuse :</strong> pour chaque ligne i, on garde les indices j ou M[i][j] != 0. <strong>Creuse &rarr; pleine :</strong> on cree une matrice de zeros et on met 1 aux positions indiquees.</p>
+</div>
+
+<pre><span class="kw">def</span> <span class="fn">pleine_vers_creuse</span>(M):
+    <span class="kw">return</span> [[j <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(M)) <span class="kw">if</span> M[i][j] <span class="op">!=</span> <span class="nu">0</span>] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(M))]
+
+<span class="kw">def</span> <span class="fn">creuse_vers_pleine</span>(L):
+    n <span class="op">=</span> <span class="fn">len</span>(L)
+    M <span class="op">=</span> [[<span class="nu">0</span>]<span class="op">*</span>n <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n)]
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):
+        <span class="kw">for</span> j <span class="kw">in</span> L[i]: M[i][j] <span class="op">=</span> <span class="nu">1</span>
+    <span class="kw">return</span> M</pre>
+
+<!-- ================================================================= -->
+<!--               DFS / BFS                                           -->
+<!-- ================================================================= -->
+
+<h3 id="dfs-bfs">2.3 DFS vs BFS -- Parcours en profondeur et en largeur</h3>
+
+<div class="card-grid">
+  <div class="card">
+    <div class="card-title" style="color:#2563eb">DFS (Depth-First Search)</div>
+    <ul>
+      <li>Utilise une <strong>pile</strong> (LIFO)</li>
+      <li><code>.pop()</code> -- dernier entre, premier sorti</li>
+      <li>Explore le plus profond d'abord</li>
+      <li>Detection de cycles, composantes connexes</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:#16a34a">BFS (Breadth-First Search)</div>
+    <ul>
+      <li>Utilise une <strong>file</strong> (FIFO)</li>
+      <li><code>.pop(0)</code> -- premier entre, premier sorti</li>
+      <li>Explore niveau par niveau</li>
+      <li>Plus court chemin (non pondere)</li>
+    </ul>
+  </div>
+</div>
+
+<h4>Code simple (sans chemin)</h4>
+<pre><span class="kw">def</span> <span class="fn">dfs</span>(graphe, depart):
+    pile = [depart]
+    visite = []
+    <span class="kw">while</span> pile:
+        s = pile.<span class="fn">pop</span>()           <span class="cm"># PILE -- dernier entre, premier sorti</span>
+        <span class="kw">if</span> s <span class="kw">not in</span> visite:
+            visite.<span class="fn">append</span>(s)
+            <span class="kw">for</span> v <span class="kw">in</span> graphe[s]:
+                <span class="kw">if</span> v <span class="kw">not in</span> visite:
+                    pile.<span class="fn">append</span>(v)
+    <span class="kw">return</span> visite
+
+<span class="kw">def</span> <span class="fn">bfs</span>(graphe, depart):
+    file = [depart]
+    visite = []
+    <span class="kw">while</span> file:
+        s = file.<span class="fn">pop</span>(<span class="nu">0</span>)          <span class="cm"># FILE -- premier entre, premier sorti</span>
+        <span class="kw">if</span> s <span class="kw">not in</span> visite:
+            visite.<span class="fn">append</span>(s)
+            <span class="kw">for</span> v <span class="kw">in</span> graphe[s]:
+                <span class="kw">if</span> v <span class="kw">not in</span> visite:
+                    file.<span class="fn">append</span>(v)
+    <span class="kw">return</span> visite</pre>
+
+<div class="box box-warn">
+  <div class="box-label">A retenir</div>
+  <p>Seule difference DFS/BFS : <code>.pop()</code> (pile) vs <code>.pop(0)</code> (file). Le reste est <strong>identique</strong>.</p>
+</div>
+
+<h4>Code complet avec suivi de chemin (du TP)</h4>
+<div class="box box-info">
+  <div class="box-label">Version avec chemin</div>
+  <p>La pile/file stocke des tuples <code>(sommet, chemin)</code> ou <code>chemin</code> est la liste des sommets parcourus pour arriver a ce sommet. Cela permet de retrouver le chemin depuis le depart.</p>
+</div>
+
+<pre><span class="kw">def</span> <span class="fn">dfs_chemin</span>(graphe, depart, arrivee):
+    <span class="cm">"""DFS avec suivi de chemin. Retourne le chemin depart -&gt; arrivee."""</span>
+    pile = [(depart, [depart])]     <span class="cm"># (sommet, chemin pour y arriver)</span>
+    visite = []
+    <span class="kw">while</span> pile:
+        s, chemin = pile.<span class="fn">pop</span>()    <span class="cm"># PILE : dernier entre, premier sorti</span>
+        <span class="kw">if</span> s <span class="op">==</span> arrivee:
+            <span class="kw">return</span> chemin           <span class="cm"># Trouve !</span>
+        <span class="kw">if</span> s <span class="kw">not in</span> visite:
+            visite.<span class="fn">append</span>(s)
+            <span class="kw">for</span> v <span class="kw">in</span> graphe[s]:
+                <span class="kw">if</span> v <span class="kw">not in</span> visite:
+                    pile.<span class="fn">append</span>((v, chemin <span class="op">+</span> [v]))
+    <span class="kw">return</span> <span class="kw">None</span>                   <span class="cm"># Pas de chemin</span>
+
+<span class="kw">def</span> <span class="fn">bfs_chemin</span>(graphe, depart, arrivee):
+    <span class="cm">"""BFS avec suivi de chemin. Retourne le PLUS COURT chemin."""</span>
+    file = [(depart, [depart])]     <span class="cm"># (sommet, chemin pour y arriver)</span>
+    visite = []
+    <span class="kw">while</span> file:
+        s, chemin = file.<span class="fn">pop</span>(<span class="nu">0</span>)   <span class="cm"># FILE : premier entre, premier sorti</span>
+        <span class="kw">if</span> s <span class="op">==</span> arrivee:
+            <span class="kw">return</span> chemin           <span class="cm"># Trouve (et c'est le plus court !)</span>
+        <span class="kw">if</span> s <span class="kw">not in</span> visite:
+            visite.<span class="fn">append</span>(s)
+            <span class="kw">for</span> v <span class="kw">in</span> graphe[s]:
+                <span class="kw">if</span> v <span class="kw">not in</span> visite:
+                    file.<span class="fn">append</span>((v, chemin <span class="op">+</span> [v]))
+    <span class="kw">return</span> <span class="kw">None</span>                   <span class="cm"># Pas de chemin</span></pre>
+
+<h4>Trace DFS pas a pas sur le graphe non oriente a 4 noeuds (depart = 0)</h4>
+<p>Graphe : L = [[1,2,3], [0,3], [0,3], [0,1,2]]</p>
+
+<div class="table-wrap"><table>
+  <tr><th>Etape</th><th>pile (avant pop)</th><th>Pop</th><th>visite</th><th>Ajout a la pile</th></tr>
+  <tr><td>Init</td><td>[0]</td><td>--</td><td>[]</td><td>--</td></tr>
+  <tr><td>1</td><td>[0]</td><td>0</td><td>[0]</td><td>1, 2, 3</td></tr>
+  <tr><td>2</td><td>[1, 2, 3]</td><td>3 (dernier)</td><td>[0, 3]</td><td>1, 2 (0 deja visite)</td></tr>
+  <tr><td>3</td><td>[1, 2, 1, 2]</td><td>2 (dernier)</td><td>[0, 3, 2]</td><td>0,3 deja visites</td></tr>
+  <tr><td>4</td><td>[1, 2, 1]</td><td>1 (dernier)</td><td>[0, 3, 2, 1]</td><td>0,3 deja visites</td></tr>
+  <tr><td>5</td><td>[1, 2]</td><td>2 (deja visite)</td><td>[0, 3, 2, 1]</td><td>--</td></tr>
+  <tr><td>6</td><td>[1]</td><td>1 (deja visite)</td><td>[0, 3, 2, 1]</td><td>--</td></tr>
+</table></div>
+<p><strong>Resultat DFS : [0, 3, 2, 1]</strong> -- DFS plonge vers le dernier voisin empile (3 avant 1 et 2)</p>
+
+<h4>Trace BFS pas a pas sur le meme graphe (depart = 0)</h4>
+
+<div class="table-wrap"><table>
+  <tr><th>Etape</th><th>file (avant pop)</th><th>Pop</th><th>visite</th><th>Ajout a la file</th></tr>
+  <tr><td>Init</td><td>[0]</td><td>--</td><td>[]</td><td>--</td></tr>
+  <tr><td>1</td><td>[0]</td><td>0 (premier)</td><td>[0]</td><td>1, 2, 3</td></tr>
+  <tr><td>2</td><td>[1, 2, 3]</td><td>1 (premier)</td><td>[0, 1]</td><td>3 (0 deja visite)</td></tr>
+  <tr><td>3</td><td>[2, 3, 3]</td><td>2 (premier)</td><td>[0, 1, 2]</td><td>3 (0 deja visite)</td></tr>
+  <tr><td>4</td><td>[3, 3, 3]</td><td>3 (premier)</td><td>[0, 1, 2, 3]</td><td>0,1,2 deja visites</td></tr>
+  <tr><td>5</td><td>[3, 3]</td><td>3 (deja visite)</td><td>[0, 1, 2, 3]</td><td>--</td></tr>
+  <tr><td>6</td><td>[3]</td><td>3 (deja visite)</td><td>[0, 1, 2, 3]</td><td>--</td></tr>
+</table></div>
+<p><strong>Resultat BFS : [0, 1, 2, 3]</strong> -- BFS explore les voisins dans l'ordre (1, 2, 3 sont tous a distance 1)</p>
+
+<h4>Applications</h4>
+<div class="card-grid">
+  <div class="card">
+    <div class="card-title" style="color:#2563eb">Applications DFS</div>
+    <ul>
+      <li><strong>Labyrinthe</strong> : DFS explore un couloir jusqu'au bout avant de revenir en arriere</li>
+      <li><strong>Detection de cycles</strong> : si on rencontre un sommet deja dans la pile d'appels</li>
+      <li><strong>Tri topologique</strong> : ordonner des taches avec dependances</li>
+      <li><strong>Composantes connexes</strong> : un DFS par composante</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:#16a34a">Applications BFS</div>
+    <ul>
+      <li><strong>Plus court chemin non pondere</strong> : BFS trouve toujours le chemin avec le moins d'aretes</li>
+      <li><strong>Distance depuis une source</strong> : le niveau BFS = la distance</li>
+      <li><strong>Test de bipartition</strong> : colorier en 2 couleurs alternees</li>
+      <li><strong>Diffusion en reseau</strong> : propagation par vagues</li>
+    </ul>
+  </div>
+</div>
+
+<h4>Illustration DFS vs BFS sur un graphe</h4>
+<div class="diagram">
+  <svg viewBox="0 0 540 260" width="540">
+    <defs>
+      <marker id="arrow3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/>
+      </marker>
+    </defs>
+
+    <!-- === LEFT SIDE: DFS === -->
+    <text x="130" y="18" text-anchor="middle" fill="#2563eb" font-size="13" font-weight="800" font-family="Inter">DFS (pile)</text>
+
+    <!-- Graph edges -->
+    <line x1="130" y1="55" x2="65" y2="110" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="130" y1="55" x2="195" y2="110" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="65" y1="110" x2="35" y2="175" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="65" y1="110" x2="100" y2="175" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="195" y1="110" x2="165" y2="175" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="195" y1="110" x2="225" y2="175" stroke="#94a3b8" stroke-width="2"/>
+
+    <!-- DFS visit order labels -->
+    <circle cx="130" cy="50" r="17" fill="#2563eb"/>
+    <text x="130" y="55" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12" font-weight="600">A</text>
+    <text x="150" y="40" fill="#2563eb" font-family="JetBrains Mono" font-size="9" font-weight="700">1er</text>
+
+    <circle cx="65" cy="110" r="16" fill="#475569"/>
+    <text x="65" y="115" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">B</text>
+    <text x="42" y="100" fill="#2563eb" font-family="JetBrains Mono" font-size="9" font-weight="700">5e</text>
+
+    <circle cx="195" cy="110" r="16" fill="#475569"/>
+    <text x="195" y="115" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">C</text>
+    <text x="218" y="100" fill="#2563eb" font-family="JetBrains Mono" font-size="9" font-weight="700">2e</text>
+
+    <circle cx="35" cy="175" r="15" fill="#64748b"/>
+    <text x="35" y="180" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">D</text>
+    <text x="12" y="168" fill="#2563eb" font-family="JetBrains Mono" font-size="9" font-weight="700">6e</text>
+
+    <circle cx="100" cy="175" r="15" fill="#64748b"/>
+    <text x="100" y="180" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">E</text>
+    <text x="118" y="168" fill="#2563eb" font-family="JetBrains Mono" font-size="9" font-weight="700">7e</text>
+
+    <circle cx="165" cy="175" r="15" fill="#64748b"/>
+    <text x="165" y="180" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">F</text>
+    <text x="183" y="168" fill="#2563eb" font-family="JetBrains Mono" font-size="9" font-weight="700">4e</text>
+
+    <circle cx="225" cy="175" r="15" fill="#64748b"/>
+    <text x="225" y="180" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">G</text>
+    <text x="243" y="168" fill="#2563eb" font-family="JetBrains Mono" font-size="9" font-weight="700">3e</text>
+
+    <!-- DFS path arrows -->
+    <path d="M140,62 Q230,40 200,100" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <path d="M205,122 L228,165" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <path d="M195,125 L168,165" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+    <text x="130" y="215" text-anchor="middle" fill="#2563eb" font-size="10" font-weight="700" font-family="Inter">A, C, G, F, B, D, E</text>
+    <text x="130" y="230" text-anchor="middle" fill="#888" font-size="9" font-family="Inter">Plonge en profondeur d'abord</text>
+
+    <!-- Separator -->
+    <line x1="270" y1="25" x2="270" y2="240" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="4,4"/>
+
+    <!-- === RIGHT SIDE: BFS === -->
+    <text x="400" y="18" text-anchor="middle" fill="#16a34a" font-size="13" font-weight="800" font-family="Inter">BFS (file)</text>
+
+    <!-- Graph edges -->
+    <line x1="400" y1="55" x2="335" y2="110" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="400" y1="55" x2="465" y2="110" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="335" y1="110" x2="305" y2="175" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="335" y1="110" x2="370" y2="175" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="465" y1="110" x2="435" y2="175" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="465" y1="110" x2="495" y2="175" stroke="#94a3b8" stroke-width="2"/>
+
+    <!-- BFS visit order labels -->
+    <circle cx="400" cy="50" r="17" fill="#16a34a"/>
+    <text x="400" y="55" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12" font-weight="600">A</text>
+    <text x="420" y="40" fill="#16a34a" font-family="JetBrains Mono" font-size="9" font-weight="700">1er</text>
+
+    <circle cx="335" cy="110" r="16" fill="#475569"/>
+    <text x="335" y="115" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">B</text>
+    <text x="312" y="100" fill="#16a34a" font-family="JetBrains Mono" font-size="9" font-weight="700">2e</text>
+
+    <circle cx="465" cy="110" r="16" fill="#475569"/>
+    <text x="465" y="115" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">C</text>
+    <text x="488" y="100" fill="#16a34a" font-family="JetBrains Mono" font-size="9" font-weight="700">3e</text>
+
+    <circle cx="305" cy="175" r="15" fill="#64748b"/>
+    <text x="305" y="180" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">D</text>
+    <text x="282" y="168" fill="#16a34a" font-family="JetBrains Mono" font-size="9" font-weight="700">4e</text>
+
+    <circle cx="370" cy="175" r="15" fill="#64748b"/>
+    <text x="370" y="180" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">E</text>
+    <text x="388" y="168" fill="#16a34a" font-family="JetBrains Mono" font-size="9" font-weight="700">5e</text>
+
+    <circle cx="435" cy="175" r="15" fill="#64748b"/>
+    <text x="435" y="180" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">F</text>
+    <text x="453" y="168" fill="#16a34a" font-family="JetBrains Mono" font-size="9" font-weight="700">6e</text>
+
+    <circle cx="495" cy="175" r="15" fill="#64748b"/>
+    <text x="495" y="180" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="11">G</text>
+    <text x="513" y="168" fill="#16a34a" font-family="JetBrains Mono" font-size="9" font-weight="700">7e</text>
+
+    <text x="400" y="215" text-anchor="middle" fill="#16a34a" font-size="10" font-weight="700" font-family="Inter">A, B, C, D, E, F, G</text>
+    <text x="400" y="230" text-anchor="middle" fill="#888" font-size="9" font-family="Inter">Explore niveau par niveau</text>
+  </svg>
+  <p class="diagram-cap">DFS plonge en profondeur (pile) vs BFS explore par couches (file). Meme graphe, ordres differents.</p>
+</div>
+
+<!-- ================================================================= -->
+<!--               KRUSKAL                                             -->
+<!-- ================================================================= -->
+
+<h3 id="kruskal">2.4 Kruskal -- Arbre Couvrant Minimum (ACM)</h3>
+
+<div class="box box-def">
+  <div class="box-label">Objectif</div>
+  <p>Trouver le sous-ensemble d'aretes qui connecte <strong>tous les sommets</strong> avec le <strong>poids total minimum</strong>, sans creer de cycle. Le resultat est un arbre (n-1 aretes pour n sommets).</p>
+</div>
+
+<h4>Algorithme en 4 etapes</h4>
+<ol>
+  <li><strong>Trier</strong> toutes les aretes par poids croissant</li>
+  <li><strong>Attribuer un numero de composante</strong> a chaque sommet (au depart, chaque sommet a son propre numero : comp[0]=0, comp[1]=1, comp[2]=2, ...)</li>
+  <li><strong>Pour chaque arete</strong> (u, v) dans l'ordre croissant :
+    <ul>
+      <li>Si <code>comp[u] == comp[v]</code> : <strong>rejeter</strong> (creerait un cycle -- meme composante)</li>
+      <li>Si <code>comp[u] != comp[v]</code> : <strong>retenir</strong> l'arete, puis <strong>unifier</strong> les numeros (tous les sommets qui avaient comp[v] prennent comp[u])</li>
+    </ul>
+  </li>
+  <li>S'arreter quand on a retenu <strong>n-1 aretes</strong> (ou quand toutes sont traitees)</li>
+</ol>
+
+<div class="box box-info">
+  <div class="box-label">Union-Find par numeros de composante</div>
+  <p>L'idee est simple : chaque sommet porte un numero de composante. Au depart, chaque sommet est dans sa propre composante (comp[i] = i). Quand on retient une arete (u, v), on <strong>fusionne les composantes</strong> : tous les sommets qui avaient le meme numero que v recoivent maintenant le numero de u.</p>
+  <p><strong>Find</strong> = simplement lire comp[i] (O(1)).</p>
+  <p><strong>Union</strong> = parcourir tout le tableau et remplacer l'ancien numero par le nouveau (O(n) dans le pire cas).</p>
+  <p>Cette technique est celle des slides du cours. Il existe des versions plus efficaces (Union-Find avec rang + compression de chemin en O(alpha(n))) mais elles ne sont pas au programme.</p>
+</div>
+
+<h4>Exemple pas a pas</h4>
+<p>Graphe a 5 sommets avec les aretes ponderees suivantes :</p>
+
+<div class="diagram">
+  <svg viewBox="0 0 350 230" width="350">
+    <!-- Edges with weights -->
+    <line x1="80" y1="50" x2="250" y2="50" stroke="#94a3b8" stroke-width="2"/>
+    <text x="165" y="40" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">4</text>
+
+    <line x1="80" y1="50" x2="55" y2="155" stroke="#94a3b8" stroke-width="2"/>
+    <text x="50" y="100" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">2</text>
+
+    <line x1="80" y1="55" x2="165" y2="155" stroke="#94a3b8" stroke-width="2"/>
+    <text x="110" y="112" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">7</text>
+
+    <line x1="250" y1="55" x2="165" y2="155" stroke="#94a3b8" stroke-width="2"/>
+    <text x="220" y="112" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">1</text>
+
+    <line x1="250" y1="55" x2="280" y2="155" stroke="#94a3b8" stroke-width="2"/>
+    <text x="280" y="100" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">3</text>
+
+    <line x1="55" y1="160" x2="160" y2="160" stroke="#94a3b8" stroke-width="2"/>
+    <text x="108" y="175" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">5</text>
+
+    <line x1="170" y1="160" x2="275" y2="160" stroke="#94a3b8" stroke-width="2"/>
+    <text x="222" y="175" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="12" font-weight="700">6</text>
+
+    <!-- Nodes -->
+    <circle cx="80" cy="50" r="18" fill="#3b82f6"/>
+    <text x="80" y="55" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">0</text>
+    <circle cx="250" cy="50" r="18" fill="#475569"/>
+    <text x="250" y="55" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">1</text>
+    <circle cx="55" cy="160" r="18" fill="#475569"/>
+    <text x="55" y="165" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">2</text>
+    <circle cx="165" cy="160" r="18" fill="#475569"/>
+    <text x="165" y="165" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">3</text>
+    <circle cx="280" cy="160" r="18" fill="#475569"/>
+    <text x="280" y="165" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">4</text>
+
+    <text x="175" y="210" text-anchor="middle" fill="#888" font-size="10" font-family="Inter">Graphe initial avec 7 aretes</text>
+  </svg>
+  <p class="diagram-cap">Graphe pondere initial pour l'algorithme de Kruskal</p>
+</div>
+
+<p><strong>Aretes triees par poids :</strong> (1,3)=1, (0,2)=2, (1,4)=3, (0,1)=4, (2,3)=5, (3,4)=6, (0,3)=7</p>
+
+<div class="table-wrap"><table>
+  <tr><th>Etape</th><th>Arete</th><th>Poids</th><th>comp[] avant</th><th>Action</th><th>comp[] apres</th></tr>
+  <tr><td>init</td><td>--</td><td>--</td><td>[0,1,2,3,4]</td><td>Chaque sommet = sa propre composante</td><td>[0,1,2,3,4]</td></tr>
+  <tr><td>1</td><td>(1,3)</td><td>1</td><td>[0,1,2,3,4]</td><td>comp[1]=1 != comp[3]=3 &rarr; RETENIR. Tous les 3 deviennent 1</td><td>[0,1,2,<strong>1</strong>,4]</td></tr>
+  <tr><td>2</td><td>(0,2)</td><td>2</td><td>[0,1,2,1,4]</td><td>comp[0]=0 != comp[2]=2 &rarr; RETENIR. Tous les 2 deviennent 0</td><td>[0,1,<strong>0</strong>,1,4]</td></tr>
+  <tr><td>3</td><td>(1,4)</td><td>3</td><td>[0,1,0,1,4]</td><td>comp[1]=1 != comp[4]=4 &rarr; RETENIR. Tous les 4 deviennent 1</td><td>[0,1,0,1,<strong>1</strong>]</td></tr>
+  <tr><td>4</td><td>(0,1)</td><td>4</td><td>[0,1,0,1,1]</td><td>comp[0]=0 != comp[1]=1 &rarr; RETENIR. Tous les 1 deviennent 0</td><td>[0,<strong>0</strong>,0,<strong>0</strong>,<strong>0</strong>]</td></tr>
+  <tr><td>--</td><td colspan="5">4 aretes retenues = n-1 = 5-1 : TERMINE</td></tr>
+</table></div>
+
+<p><strong>Cout ACM = 1 + 2 + 3 + 4 = 10</strong></p>
+
+<h4>Resultat : Arbre Couvrant Minimum</h4>
+<div class="diagram">
+  <svg viewBox="0 0 350 200" width="350">
+    <!-- ACM edges (the 4 retained) -->
+    <line x1="80" y1="50" x2="250" y2="50" stroke="#16a34a" stroke-width="3"/>
+    <text x="165" y="40" text-anchor="middle" fill="#16a34a" font-family="JetBrains Mono" font-size="12" font-weight="700">4</text>
+
+    <line x1="80" y1="50" x2="55" y2="145" stroke="#16a34a" stroke-width="3"/>
+    <text x="50" y="95" text-anchor="middle" fill="#16a34a" font-family="JetBrains Mono" font-size="12" font-weight="700">2</text>
+
+    <line x1="250" y1="55" x2="165" y2="145" stroke="#16a34a" stroke-width="3"/>
+    <text x="220" y="105" text-anchor="middle" fill="#16a34a" font-family="JetBrains Mono" font-size="12" font-weight="700">1</text>
+
+    <line x1="250" y1="55" x2="280" y2="145" stroke="#16a34a" stroke-width="3"/>
+    <text x="280" y="95" text-anchor="middle" fill="#16a34a" font-family="JetBrains Mono" font-size="12" font-weight="700">3</text>
+
+    <!-- Nodes -->
+    <circle cx="80" cy="50" r="18" fill="#16a34a"/>
+    <text x="80" y="55" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">0</text>
+    <circle cx="250" cy="50" r="18" fill="#16a34a"/>
+    <text x="250" y="55" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">1</text>
+    <circle cx="55" cy="150" r="18" fill="#16a34a"/>
+    <text x="55" y="155" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">2</text>
+    <circle cx="165" cy="150" r="18" fill="#16a34a"/>
+    <text x="165" y="155" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">3</text>
+    <circle cx="280" cy="150" r="18" fill="#16a34a"/>
+    <text x="280" y="155" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">4</text>
+
+    <text x="175" y="190" text-anchor="middle" fill="#16a34a" font-size="10" font-weight="700" font-family="Inter">ACM : cout total = 10</text>
+  </svg>
+  <p class="diagram-cap">Arbre Couvrant Minimum : 4 aretes retenues (en vert), les 3 autres rejetees</p>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Complexite de Kruskal</div>
+  <p><strong>O(m log m)</strong> ou m est le nombre d'aretes. L'etape dominante est le <strong>tri des aretes</strong> (O(m log m)). Le parcours des aretes triees est O(m), et chaque operation d'union est O(n) dans le pire cas (avec notre technique de numeros de composante), donne O(n*m) au total pour les unions, mais comme m &le; n^2, le tri reste dominant pour les graphes typiques.</p>
+</div>
+
+<!-- ================================================================= -->
+<!--               DIJKSTRA                                            -->
+<!-- ================================================================= -->
+
+<h3 id="dijkstra">2.5 Dijkstra -- Plus courts chemins</h3>
+
+<div class="box box-info">
+  <div class="box-label">Hors programme CC</div>
+  <p>Dijkstra est au programme du <strong>partiel final</strong>, pas du controle continu. Le comprendre donne un avantage.</p>
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Principe</div>
+  <p>Trouver le <strong>plus court chemin</strong> depuis un sommet source vers tous les autres, dans un graphe pondere a <strong>poids positifs uniquement</strong>. On maintient deux tableaux : <code>Dist[i]</code> (distance minimale connue depuis la source) et <code>Traj[i]</code> (predecesseur sur le chemin optimal).</p>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Poids positifs uniquement !</div>
+  <p>Dijkstra <strong>ne fonctionne pas</strong> avec des poids negatifs. Si un poids est negatif, on pourrait trouver un raccourci en passant par une arete negative apres avoir deja traite un sommet, ce qui fausserait les distances. Pour les poids negatifs, il faut utiliser l'algorithme de Bellman-Ford.</p>
+</div>
+
+<h4>Algorithme detaille</h4>
+<ol>
+  <li>Initialiser <code>Dist[source] = 0</code>, tous les autres a l'infini. <code>Traj[i] = None</code> pour tous.</li>
+  <li>Tous les sommets sont "non traites" (dans un ensemble restants).</li>
+  <li>Repeter tant qu'il reste des sommets non traites :
+    <ul>
+      <li>Choisir le sommet non traite <code>u</code> avec le plus petit <code>Dist[u]</code></li>
+      <li>Marquer <code>u</code> comme traite (le retirer de restants)</li>
+      <li>Pour chaque voisin <code>v</code> non traite de <code>u</code> : si <code>Dist[u] + poids(u,v) &lt; Dist[v]</code>, alors mettre a jour <code>Dist[v] = Dist[u] + poids(u,v)</code> et <code>Traj[v] = u</code> (relaxation)</li>
+    </ul>
+  </li>
+  <li>S'arreter quand tous les sommets sont traites</li>
+</ol>
+
+<h4>Exemple pas a pas (source = A)</h4>
+
+<div class="diagram">
+  <svg viewBox="0 0 320 200" width="320">
+    <!-- Edges with weights -->
+    <line x1="60" y1="50" x2="160" y2="50" stroke="#94a3b8" stroke-width="2"/>
+    <text x="110" y="40" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="11" font-weight="700">1</text>
+
+    <line x1="60" y1="55" x2="60" y2="145" stroke="#94a3b8" stroke-width="2"/>
+    <text x="45" y="100" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="11" font-weight="700">4</text>
+
+    <line x1="160" y1="55" x2="160" y2="145" stroke="#94a3b8" stroke-width="2"/>
+    <text x="175" y="100" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="11" font-weight="700">2</text>
+
+    <line x1="160" y1="55" x2="260" y2="100" stroke="#94a3b8" stroke-width="2"/>
+    <text x="220" y="68" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="11" font-weight="700">5</text>
+
+    <line x1="65" y1="150" x2="155" y2="150" stroke="#94a3b8" stroke-width="2"/>
+    <text x="110" y="165" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="11" font-weight="700">3</text>
+
+    <line x1="165" y1="150" x2="255" y2="105" stroke="#94a3b8" stroke-width="2"/>
+    <text x="220" y="135" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="11" font-weight="700">1</text>
+
+    <!-- Nodes -->
+    <circle cx="60" cy="50" r="18" fill="#3b82f6"/>
+    <text x="60" y="55" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13" font-weight="600">A</text>
+    <circle cx="160" cy="50" r="18" fill="#475569"/>
+    <text x="160" y="55" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">B</text>
+    <circle cx="60" cy="150" r="18" fill="#475569"/>
+    <text x="60" y="155" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">C</text>
+    <circle cx="160" cy="150" r="18" fill="#475569"/>
+    <text x="160" y="155" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">D</text>
+    <circle cx="260" cy="100" r="18" fill="#475569"/>
+    <text x="260" y="105" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="13">E</text>
+  </svg>
+  <p class="diagram-cap">Graphe pondere pour Dijkstra (source = A). Aretes : A-B=1, A-C=4, B-D=2, B-E=5, C-D=3, D-E=1</p>
+</div>
+
+<div class="table-wrap"><table>
+  <tr><th>Etape</th><th>Sommet traite</th><th>Dist[A]</th><th>Dist[B]</th><th>Dist[C]</th><th>Dist[D]</th><th>Dist[E]</th><th>Traj</th></tr>
+  <tr><td>Init</td><td>--</td><td><strong>0</strong></td><td>inf</td><td>inf</td><td>inf</td><td>inf</td><td>[--,--,--,--,--]</td></tr>
+  <tr><td>1</td><td>A (Dist=0, le min)</td><td>0</td><td><strong>1</strong></td><td><strong>4</strong></td><td>inf</td><td>inf</td><td>[--,A,A,--,--]</td></tr>
+  <tr><td>2</td><td>B (Dist=1, le min)</td><td>0</td><td>1</td><td>4</td><td><strong>3</strong></td><td><strong>6</strong></td><td>[--,A,A,B,B]</td></tr>
+  <tr><td>3</td><td>D (Dist=3, le min)</td><td>0</td><td>1</td><td>4</td><td>3</td><td><strong>4</strong></td><td>[--,A,A,B,<strong>D</strong>]</td></tr>
+  <tr><td>4</td><td>C (Dist=4, egal a E)</td><td>0</td><td>1</td><td>4</td><td>3</td><td>4</td><td>(C a pour voisin D, mais 4+3=7 &gt; 3, pas de mise a jour)</td></tr>
+  <tr><td>5</td><td>E (Dist=4)</td><td>0</td><td>1</td><td>4</td><td>3</td><td>4</td><td>TERMINE</td></tr>
+</table></div>
+
+<div class="box box-info">
+  <div class="box-label">Detail des relaxations</div>
+  <ul>
+    <li><strong>Etape 1 (traiter A) :</strong> voisins de A = B (poids 1) et C (poids 4). Dist[B] = min(inf, 0+1) = 1, Traj[B] = A. Dist[C] = min(inf, 0+4) = 4, Traj[C] = A.</li>
+    <li><strong>Etape 2 (traiter B) :</strong> voisins de B = D (poids 2) et E (poids 5). Dist[D] = min(inf, 1+2) = 3, Traj[D] = B. Dist[E] = min(inf, 1+5) = 6, Traj[E] = B.</li>
+    <li><strong>Etape 3 (traiter D) :</strong> voisins de D = E (poids 1) et C (poids 3). Dist[E] = min(6, 3+1) = 4 &lt; 6 &rarr; mise a jour ! Traj[E] = D. Dist[C] = min(4, 3+3) = 4 &ge; 4 &rarr; pas de mise a jour.</li>
+    <li><strong>Etape 4 (traiter C) :</strong> voisin de C = D, mais 4+3=7 &gt; 3, pas de mise a jour.</li>
+  </ul>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Lecture du chemin (remonter Traj)</div>
+  <p>Pour trouver le chemin vers E : Traj[E]=D, Traj[D]=B, Traj[B]=A. On remonte et on inverse : <strong>A &rarr; B &rarr; D &rarr; E</strong> (cout = 4).</p>
+  <p>Pour trouver le chemin vers C : Traj[C]=A. Donc <strong>A &rarr; C</strong> (cout = 4).</p>
+  <p>Pour trouver le chemin vers D : Traj[D]=B, Traj[B]=A. Donc <strong>A &rarr; B &rarr; D</strong> (cout = 3).</p>
+</div>
+
+<hr>
+
+<!-- ================================================================= -->
+<!--             III. COMPLEXITE                                       -->
+<!-- ================================================================= -->
+
+<h2 id="complexite"><span class="badge badge-complex">COMPLEXITE</span> III. Complexite algorithmique</h2>
+
+<h3>3.1 Notation de Landau (Grand O)</h3>
+<div class="formula">T(n) = O(f(n))  &hArr;  &exist; c, n&#8320; : &forall;n &gt; n&#8320;,  T(n) &le; c x f(n)</div>
+
+<div class="box box-info">
+  <div class="box-label">Explication intuitive</div>
+  <p>O(f(n)) signifie que l'algorithme <strong>ne fait pas pire</strong> que f(n) a une constante pres, pour n assez grand. On ignore les constantes multiplicatives et les termes de plus petit ordre car ils deviennent negligeables quand n grandit.</p>
+  <p>Exemple : si un algorithme fait exactement 3n^2 + 10n + 500 operations, on dit qu'il est O(n^2) car pour n grand, le terme 3n^2 domine largement les autres. Les constantes 3, 10, et 500 ne changent pas le "comportement global" quand n tend vers l'infini.</p>
+</div>
+
+<p>On garde le <strong>terme dominant</strong>, on ignore les constantes : 3n&sup2; + 10n + 500 &rarr; <strong>O(n&sup2;)</strong></p>
+
+<h4>Pire cas, meilleur cas, cas moyen</h4>
+<div class="card-grid">
+  <div class="card">
+    <div class="card-title" style="color:#ef4444">Pire cas (worst case)</div>
+    <p>Le nombre maximum d'operations pour TOUTE entree de taille n. C'est ce qu'on utilise par defaut avec O() car il donne une <strong>garantie</strong> : l'algorithme ne fera JAMAIS pire que ca.</p>
+    <p>Exemple : recherche lineaire dans un tableau de n elements &rarr; pire cas = O(n) (element absent ou en derniere position).</p>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:#16a34a">Meilleur cas / cas moyen</div>
+    <p><strong>Meilleur cas :</strong> peu interessant en general. Pour la recherche lineaire, c'est O(1) (trouve en premiere position).</p>
+    <p><strong>Cas moyen :</strong> necessite des hypotheses sur la distribution des entrees. Pour la recherche lineaire avec element present et equiprobable &rarr; O(n/2) = O(n).</p>
+    <p>On utilise presque toujours le <strong>pire cas</strong> pour donner des garanties solides.</p>
+  </div>
+</div>
+
+<h4>Exemples de simplification avec preuve</h4>
+<div class="box box-def">
+  <div class="box-label">Exemple 1 : 5n^3 + 2n = O(n^3)</div>
+  <p>Preuve : pour n &ge; 1, on a 2n &le; 2n^3. Donc 5n^3 + 2n &le; 5n^3 + 2n^3 = <strong>7n^3</strong>. On prend c = 7 et n0 = 1. Donc 5n^3 + 2n = O(n^3).</p>
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Exemple 2 : n^2 + 100n + 10000 = O(n^2)</div>
+  <p>Preuve : pour n &ge; 100, on a 100n &le; n^2 et 10000 &le; n^2. Donc n^2 + 100n + 10000 &le; n^2 + n^2 + n^2 = <strong>3n^2</strong>. On prend c = 3 et n0 = 100.</p>
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Exemple 3 : log(n^2) = O(log n)</div>
+  <p>Preuve : log(n^2) = 2 * log(n). On prend c = 2 et n0 = 1. C'est bien O(log n).</p>
+</div>
+
+<div class="scale">
+  <span style="background:#16a34a">O(1)</span>
+  <span style="background:#22c55e">O(log n)</span>
+  <span style="background:#84cc16">O(n)</span>
+  <span style="background:#eab308">O(n log n)</span>
+  <span style="background:#f97316">O(n&sup2;)</span>
+  <span style="background:#ef4444">O(n&sup3;)</span>
+  <span style="background:#7f1d1d">O(2&#8319;)</span>
+</div>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Complexite</th><th>Nom</th><th>n=10</th><th>n=100</th><th>n=1000</th><th>Exemple</th></tr>
+  <tr><td><strong>O(1)</strong></td><td>Constante</td><td>1</td><td>1</td><td>1</td><td>Acces tableau</td></tr>
+  <tr><td><strong>O(log n)</strong></td><td>Logarithmique</td><td>3</td><td>7</td><td>10</td><td>Recherche dicho</td></tr>
+  <tr><td><strong>O(n)</strong></td><td>Lineaire</td><td>10</td><td>100</td><td>1 000</td><td>Recherche lineaire</td></tr>
+  <tr><td><strong>O(n log n)</strong></td><td>Quasi-lineaire</td><td>33</td><td>664</td><td>9 966</td><td>Tri fusion</td></tr>
+  <tr><td><strong>O(n&sup2;)</strong></td><td>Quadratique</td><td>100</td><td>10 000</td><td>10&#8310;</td><td>Tri a bulles</td></tr>
+  <tr><td><strong>O(2&#8319;)</strong></td><td>Exponentielle</td><td>1 024</td><td>10&sup3;&#8304;</td><td>--</td><td>Force brute</td></tr>
+</table>
+</div>
+
+<h3>3.2 Cout du code -- analyse structure par structure</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Structure</th><th>Cout</th></tr>
+  <tr><td><strong>Sequence</strong> (A puis B)</td><td>T1 + T2</td></tr>
+  <tr><td><strong>if/else</strong></td><td>T_cond + max(T_alors, T_sinon)</td></tr>
+  <tr><td><strong>Boucle</strong> (N iterations)</td><td>N x (T_cond + T_corps)</td></tr>
+  <tr><td><strong>Appel de fonction</strong></td><td>T_fonction(taille parametre)</td></tr>
+  <tr><td><strong>Recursion</strong></td><td>Equation de recurrence &rarr; th. maitre</td></tr>
+</table>
+</div>
+
+<h4>Exemples detailles pour chaque structure</h4>
+
+<div class="card">
+  <div class="card-title">Sequence : O(n) + O(n) = O(n)</div>
+<pre><span class="cm"># Deux boucles sequentielles = on additionne</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):       <span class="cm"># O(n)</span>
+    <span class="fn">print</span>(i)
+<span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(n):       <span class="cm"># O(n)</span>
+    <span class="fn">print</span>(j)
+<span class="cm"># Total = O(n) + O(n) = O(2n) = O(n)</span></pre>
+</div>
+
+<div class="card">
+  <div class="card-title">Conditionnelle : on prend le max</div>
+<pre><span class="kw">if</span> condition:             <span class="cm"># O(1) pour le test</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):   <span class="cm"># O(n) si vrai</span>
+        <span class="fn">print</span>(i)
+<span class="kw">else</span>:
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n<span class="op">*</span>n): <span class="cm"># O(n^2) si faux</span>
+        <span class="fn">print</span>(i)
+<span class="cm"># Pire cas = max(O(n), O(n^2)) = O(n^2)</span></pre>
+</div>
+
+<div class="card">
+  <div class="card-title">Boucles imbriquees : on multiplie</div>
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):           <span class="cm"># n iterations</span>
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(n):       <span class="cm"># n iterations</span>
+        <span class="fn">print</span>(i, j)           <span class="cm"># O(1)</span>
+<span class="cm"># Total = n x n x O(1) = O(n^2)</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):           <span class="cm"># n iterations</span>
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(i):       <span class="cm"># i iterations (variable !)</span>
+        <span class="fn">print</span>(i, j)           <span class="cm"># O(1)</span>
+<span class="cm"># Total = 0+1+2+...+(n-1) = n(n-1)/2 = O(n^2)</span></pre>
+</div>
+
+<div class="card">
+  <div class="card-title">Appel de fonction : on substitue</div>
+<pre><span class="kw">def</span> <span class="fn">f</span>(T):                    <span class="cm"># O(len(T))</span>
+    <span class="kw">for</span> x <span class="kw">in</span> T:
+        <span class="fn">print</span>(x)
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):           <span class="cm"># n iterations</span>
+    <span class="fn">f</span>(T)                      <span class="cm"># chaque appel = O(n)</span>
+<span class="cm"># Total = n x O(n) = O(n^2)</span></pre>
+</div>
+
+<h4>Tri pancake -- analyse de complexite</h4>
+<div class="box box-info">
+  <div class="box-label">Principe du tri pancake</div>
+  <p>On ne peut faire qu'une seule operation : <strong>retourner les k premiers elements</strong> du tableau (comme retourner une pile de crepes). Pour trier :</p>
+  <ol>
+    <li>Trouver le maximum du tableau (O(n))</li>
+    <li>Le retourner en premiere position (1 retournement)</li>
+    <li>Le retourner en derniere position (1 retournement)</li>
+    <li>Repeter sur le tableau reduit (sans le dernier element)</li>
+  </ol>
+  <p>A chaque iteration, on place un element a sa position finale. On fait n-1 iterations, chacune avec O(n) pour trouver le max + 2 retournements (O(n) chacun). <strong>Complexite : O(n^2)</strong>.</p>
+</div>
+
+<h3>3.3 Theoreme Maitre</h3>
+<div class="box box-def">
+  <div class="box-label">Deux formes de recurrence</div>
+  <p><strong>Forme 1 :</strong> T(n) = c * T(n - 1) + b * n^k &nbsp;-- on reduit la taille de 1 a chaque appel (exemples : fibonacci, factorielle)</p>
+  <p><strong>Forme 2 :</strong> T(n) = c * T(n / d) + b * n^k &nbsp;-- on divise la taille par d a chaque appel (exemples : recherche dichotomique, tri fusion)</p>
+  <p>La forme determine quels cas appliquer. Forme 1 &rarr; cas 1.1 ou 1.2. Forme 2 &rarr; cas 2.1, 2.2 ou 2.3.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Recurrence</th><th>Condition</th><th>Resultat</th><th>Cas</th></tr>
+  <tr><td>T(n) = c*T(n-1) + b*n&#7496;</td><td>c = 1</td><td><strong>O(n&#7496;&#8314;&#8305;)</strong></td><td>1.1</td></tr>
+  <tr><td>"</td><td>c &gt; 1</td><td><strong>O(c&#8319;)</strong></td><td>1.2</td></tr>
+  <tr><td>T(n) = c*T(n/d) + b*n&#7496;</td><td>c &gt; d&#7496;</td><td><strong>O(n<sup>log<sub>d</sub>c</sup>)</strong></td><td>2.1</td></tr>
+  <tr><td>"</td><td>c = d&#7496;</td><td><strong>O(n&#7496; log n)</strong></td><td>2.2</td></tr>
+  <tr><td>"</td><td>c &lt; d&#7496;</td><td><strong>O(n&#7496;)</strong></td><td>2.3</td></tr>
+</table>
+</div>
+
+<div class="box box-info">
+  <div class="box-label">Explication intuitive des cas (Forme 2)</div>
+  <p>On compare le <strong>cout de la recursion</strong> (c appels) au <strong>cout du travail</strong> a chaque niveau (n^k, divise par d^k a chaque niveau) :</p>
+  <ul>
+    <li><strong>Cas 2.1 (c &gt; d^k) :</strong> la recursion domine. Le nombre d'appels croit plus vite que le travail ne diminue. Le cout total est domine par le nombre de feuilles de l'arbre de recursion : O(n^(log_d c)).</li>
+    <li><strong>Cas 2.2 (c = d^k) :</strong> equilibre parfait. Le travail a chaque niveau est le meme. Il y a log_d(n) niveaux, chacun coutant O(n^k). Total : O(n^k log n).</li>
+    <li><strong>Cas 2.3 (c &lt; d^k) :</strong> le travail domine. Le travail diminue plus lentement que la recursion. Le cout total est domine par le premier niveau : O(n^k).</li>
+  </ul>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Tri fusion detaille</div>
+  <p>T(n) = 2*T(n/2) + O(n) &rarr; c=2, d=2, k=1 &rarr; d&#7496;=2=c &rarr; <strong>Cas 2.2 &rarr; O(n log n)</strong></p>
+  <p><strong>Explication par l'arbre de recursion :</strong></p>
+  <ul>
+    <li>Niveau 0 : 1 probleme de taille n &rarr; cout de fusion = n</li>
+    <li>Niveau 1 : 2 problemes de taille n/2 &rarr; cout de fusion = 2 x n/2 = n</li>
+    <li>Niveau 2 : 4 problemes de taille n/4 &rarr; cout de fusion = 4 x n/4 = n</li>
+    <li>... chaque niveau coute exactement n operations de fusion</li>
+    <li>Nombre de niveaux : log2(n) (on divise par 2 a chaque fois)</li>
+    <li>Total = n x log2(n) = <strong>O(n log n)</strong></li>
+  </ul>
+</div>
+
+<h3>3.4 Tris</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Algorithme</th><th>Complexite</th><th>En place</th><th>Stable</th><th>Principe</th></tr>
+  <tr><td>Tri a bulles</td><td style="color:#ef4444">O(n&sup2;)</td><td>oui</td><td>oui</td><td>Echanges d'elements adjacents</td></tr>
+  <tr><td>Tri insertion</td><td style="color:#ef4444">O(n&sup2;)</td><td>oui</td><td>oui</td><td>Inserer chaque element a sa place</td></tr>
+  <tr><td>Tri selection</td><td style="color:#ef4444">O(n&sup2;)</td><td>oui</td><td>non</td><td>Selectionner le min et le placer</td></tr>
+  <tr><td>Tri fusion</td><td style="color:#16a34a">O(n log n)</td><td>non</td><td>oui</td><td>Diviser, trier, fusionner</td></tr>
+  <tr><td>Tri rapide</td><td style="color:#16a34a">O(n log n)*</td><td>oui</td><td>non</td><td>Pivot + partition</td></tr>
+  <tr><td>Tri par tas</td><td style="color:#16a34a">O(n log n)</td><td>oui</td><td>non</td><td>Tas max + extractions</td></tr>
+</table>
+</div>
+<p style="font-size:0.78rem;color:#999">* O(n&sup2;) pire cas. En place = pas de memoire supplementaire O(n). Stable = elements egaux gardent leur ordre.</p>
+
+<h4>Tri a bulles -- O(n^2)</h4>
+<p>On parcourt le tableau plusieurs fois. A chaque passage, on compare les elements adjacents et on les echange si ils sont dans le mauvais ordre. Les plus grands elements "remontent" vers la fin comme des bulles.</p>
+<pre><span class="kw">def</span> <span class="fn">tri_bulles</span>(T):
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(T)):
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">0</span>, <span class="fn">len</span>(T)-i-<span class="nu">1</span>):
+            <span class="kw">if</span> T[j] <span class="op">&gt;</span> T[j+<span class="nu">1</span>]:
+                T[j], T[j+<span class="nu">1</span>] <span class="op">=</span> T[j+<span class="nu">1</span>], T[j]</pre>
+
+<h4>Tri par insertion -- O(n^2)</h4>
+<p>On prend chaque element (a partir du 2e) et on l'insere a sa bonne position dans la partie deja triee a gauche, en decalant les elements plus grands vers la droite.</p>
+<pre><span class="kw">def</span> <span class="fn">tri_insertion</span>(T):
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">1</span>, <span class="fn">len</span>(T)):
+        cle = T[i]               <span class="cm"># element a inserer</span>
+        j = i <span class="op">-</span> <span class="nu">1</span>
+        <span class="kw">while</span> j <span class="op">&gt;=</span> <span class="nu">0</span> <span class="kw">and</span> T[j] <span class="op">&gt;</span> cle:
+            T[j <span class="op">+</span> <span class="nu">1</span>] = T[j]      <span class="cm"># decaler vers la droite</span>
+            j = j <span class="op">-</span> <span class="nu">1</span>
+        T[j <span class="op">+</span> <span class="nu">1</span>] = cle           <span class="cm"># inserer a la bonne place</span></pre>
+
+<h4>Tri par selection -- O(n^2)</h4>
+<p>On cherche le minimum du tableau non trie, et on l'echange avec le premier element non trie. On repete en reduisant la partie non triee d'un element a chaque iteration.</p>
+<pre><span class="kw">def</span> <span class="fn">tri_selection</span>(T):
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(T)):
+        i_min = i                 <span class="cm"># indice du minimum</span>
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(i <span class="op">+</span> <span class="nu">1</span>, <span class="fn">len</span>(T)):
+            <span class="kw">if</span> T[j] <span class="op">&lt;</span> T[i_min]:
+                i_min = j
+        T[i], T[i_min] = T[i_min], T[i]  <span class="cm"># echange</span></pre>
+
+<h4>Tri fusion -- O(n log n)</h4>
+<p>Diviser pour regner : on divise le tableau en deux moities, on trie chaque moitie recursivement, puis on <strong>fusionne</strong> les deux moities triees en un seul tableau trie.</p>
+
+<pre><span class="kw">def</span> <span class="fn">fusion</span>(G, D):
+    <span class="cm">"""Fusionne deux tableaux tries G et D en un seul tableau trie"""</span>
+    resultat = []
+    i = j = <span class="nu">0</span>
+    <span class="kw">while</span> i <span class="op">&lt;</span> <span class="fn">len</span>(G) <span class="kw">and</span> j <span class="op">&lt;</span> <span class="fn">len</span>(D):
+        <span class="kw">if</span> G[i] <span class="op">&lt;=</span> D[j]:
+            resultat.<span class="fn">append</span>(G[i])
+            i <span class="op">+=</span> <span class="nu">1</span>
+        <span class="kw">else</span>:
+            resultat.<span class="fn">append</span>(D[j])
+            j <span class="op">+=</span> <span class="nu">1</span>
+    resultat <span class="op">+=</span> G[i:]             <span class="cm"># ajouter le reste</span>
+    resultat <span class="op">+=</span> D[j:]
+    <span class="kw">return</span> resultat
+
+<span class="kw">def</span> <span class="fn">tri_fusion</span>(T):
+    <span class="kw">if</span> <span class="fn">len</span>(T) <span class="op">&lt;=</span> <span class="nu">1</span>:
+        <span class="kw">return</span> T
+    mid = <span class="fn">len</span>(T) <span class="op">//</span> <span class="nu">2</span>
+    G = <span class="fn">tri_fusion</span>(T[:mid])      <span class="cm"># trier la moitie gauche</span>
+    D = <span class="fn">tri_fusion</span>(T[mid:])      <span class="cm"># trier la moitie droite</span>
+    <span class="kw">return</span> <span class="fn">fusion</span>(G, D)          <span class="cm"># fusionner les deux</span></pre>
+
+<div class="box box-info">
+  <div class="box-label">Trace de la fusion pas a pas</div>
+  <p>Fusionner G = [1, 4, 7] et D = [2, 3, 8] :</p>
+  <ul>
+    <li>i=0, j=0 : G[0]=1 &le; D[0]=2 &rarr; prendre 1, i=1. Resultat : [1]</li>
+    <li>i=1, j=0 : G[1]=4 &gt; D[0]=2 &rarr; prendre 2, j=1. Resultat : [1, 2]</li>
+    <li>i=1, j=1 : G[1]=4 &gt; D[1]=3 &rarr; prendre 3, j=2. Resultat : [1, 2, 3]</li>
+    <li>i=1, j=2 : G[1]=4 &le; D[2]=8 &rarr; prendre 4, i=2. Resultat : [1, 2, 3, 4]</li>
+    <li>i=2, j=2 : G[2]=7 &le; D[2]=8 &rarr; prendre 7, i=3. Resultat : [1, 2, 3, 4, 7]</li>
+    <li>i=3 : G epuise. Ajouter D[2:] = [8]. Resultat : [1, 2, 3, 4, 7, 8]</li>
+  </ul>
+</div>
+
+<h3>3.5 Recherche dichotomique</h3>
+<div class="box box-def">
+  <div class="box-label">Pourquoi O(log n) ?</div>
+  <p>A chaque etape, on <strong>divise l'espace de recherche par 2</strong>. Si on a n elements, apres 1 comparaison il reste n/2, apres 2 il reste n/4, ..., apres k il reste n/2^k. On s'arrete quand n/2^k = 1, soit k = log2(n). Donc au plus <strong>log2(n) comparaisons</strong>.</p>
+  <p>Exemple concret : pour n = 1 000 000 elements, log2(1 000 000) &approx; 20. Seulement 20 comparaisons au lieu de 1 000 000 !</p>
+</div>
+
+<pre><span class="cm"># Recherche dichotomique -- O(log n)</span>
+<span class="kw">def</span> <span class="fn">rech_dic</span>(e, T):
+    deb, fin <span class="op">=</span> <span class="nu">0</span>, <span class="fn">len</span>(T) <span class="op">-</span> <span class="nu">1</span>
+    <span class="kw">while</span> deb <span class="op">&lt;=</span> fin:
+        mil <span class="op">=</span> (deb <span class="op">+</span> fin) <span class="op">//</span> <span class="nu">2</span>
+        <span class="kw">if</span> T[mil] <span class="op">&lt;</span> e: deb <span class="op">=</span> mil <span class="op">+</span> <span class="nu">1</span>
+        <span class="kw">else</span>:           fin <span class="op">=</span> mil <span class="op">-</span> <span class="nu">1</span>
+    <span class="kw">if</span> deb <span class="op">&lt;</span> <span class="fn">len</span>(T) <span class="kw">and</span> T[deb] <span class="op">==</span> e: <span class="kw">return</span> deb
+    <span class="kw">return</span> <span class="op">-</span><span class="nu">1</span></pre>
+
+<h4>Trace de rech_dic(5, [1, 3, 5, 7, 9])</h4>
+<div class="table-wrap"><table>
+  <tr><th>Iteration</th><th>deb</th><th>fin</th><th>mil</th><th>T[mil]</th><th>Action</th></tr>
+  <tr><td>1</td><td>0</td><td>4</td><td>2</td><td>5</td><td>5 &ge; 5 &rarr; fin = 1</td></tr>
+  <tr><td>2</td><td>0</td><td>1</td><td>0</td><td>1</td><td>1 &lt; 5 &rarr; deb = 1</td></tr>
+  <tr><td>3</td><td>1</td><td>1</td><td>1</td><td>3</td><td>3 &lt; 5 &rarr; deb = 2</td></tr>
+  <tr><td>--</td><td colspan="5">deb=2 &gt; fin=1 : sortie de boucle. T[2]=5=e &rarr; <strong>retourne 2</strong></td></tr>
+</table></div>
+
+<h3>3.6 Algorithme de Kadane (sous-somme maximale)</h3>
+
+<div class="box box-def">
+  <div class="box-label">Probleme</div>
+  <p>Trouver la <strong>plus grande somme d'elements consecutifs</strong> dans un tableau (qui peut contenir des nombres negatifs). Exemple : [-2, 1, -3, 4, -1, 2, 1, -5, 4] &rarr; sous-tableau [4, -1, 2, 1] de somme <strong>6</strong>.</p>
+</div>
+
+<div class="box box-info">
+  <div class="box-label">Principe de Kadane -- O(n)</div>
+  <p>On maintient deux variables : <code>cur</code> = meilleure somme se terminant a la position courante, <code>max_s</code> = meilleure somme vue globalement. A chaque element x :</p>
+  <ul>
+    <li><code>cur = max(x, cur + x)</code> -- soit on prolonge la sous-somme courante, soit on en demarre une nouvelle a partir de x</li>
+    <li><code>max_s = max(max_s, cur)</code> -- on met a jour le maximum global</li>
+  </ul>
+  <p>L'idee cle : si cur + x &lt; x, alors le sous-tableau precedent nous "tire vers le bas" et il vaut mieux repartir de x seul.</p>
+</div>
+
+<pre><span class="kw">def</span> <span class="fn">kadane</span>(T):
+    max_s <span class="op">=</span> cur <span class="op">=</span> T[<span class="nu">0</span>]
+    <span class="kw">for</span> x <span class="kw">in</span> T[<span class="nu">1</span>:]:
+        cur <span class="op">=</span> <span class="fn">max</span>(x, cur <span class="op">+</span> x)
+        max_s <span class="op">=</span> <span class="fn">max</span>(max_s, cur)
+    <span class="kw">return</span> max_s</pre>
+
+<hr>
+<!-- ================================================================= -->
+<!--            EXERCICES ARBRES                                       -->
+<!-- ================================================================= -->
+
+<h2 id="exo-arbres"><span class="badge badge-exo">EXERCICES</span> Arbres</h2>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD4</span><h4>Expression arithmetique en arbre</h4></div><div class="exo-body">
+  <p>A quel arbre correspond <code>(3 - (5+4)*(5-1))</code> ? Parcours prefixe, infixe, postfixe.</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p>Racine = <strong>-</strong>. Fils gauche : 3. Fils droit : <strong>*</strong> avec fils + (5,4) et - (5,1).</p>
+    <div class="diagram">
+      <svg viewBox="0 0 340 190" width="340">
+        <line x1="170" y1="28" x2="80" y2="70" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="170" y1="28" x2="250" y2="70" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="250" y1="70" x2="180" y2="120" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="250" y1="70" x2="310" y2="120" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="180" y1="120" x2="155" y2="165" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="180" y1="120" x2="205" y2="165" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="310" y1="120" x2="285" y2="165" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="310" y1="120" x2="330" y2="165" stroke="#cbd5e1" stroke-width="2"/>
+        <circle cx="170" cy="28" r="15" fill="#3b82f6"/>
+        <text x="170" y="34" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="14" font-weight="700">-</text>
+        <circle cx="80" cy="70" r="14" fill="#64748b"/>
+        <text x="80" y="75" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="12">3</text>
+        <circle cx="250" cy="70" r="15" fill="#475569"/>
+        <text x="250" y="76" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="14" font-weight="700">*</text>
+        <circle cx="180" cy="120" r="14" fill="#475569"/>
+        <text x="180" y="126" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="14" font-weight="700">+</text>
+        <circle cx="310" cy="120" r="14" fill="#475569"/>
+        <text x="310" y="126" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="14" font-weight="700">-</text>
+        <circle cx="155" cy="165" r="12" fill="#64748b"/>
+        <text x="155" y="170" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">5</text>
+        <circle cx="205" cy="165" r="12" fill="#64748b"/>
+        <text x="205" y="170" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">4</text>
+        <circle cx="285" cy="165" r="12" fill="#64748b"/>
+        <text x="285" y="170" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">5</text>
+        <circle cx="330" cy="165" r="12" fill="#64748b"/>
+        <text x="330" y="170" text-anchor="middle" fill="#fff" font-family="JetBrains Mono" font-size="10">1</text>
+      </svg>
+    </div>
+    <p><strong>Prefixe :</strong> -, 3, *, +, 5, 4, -, 5, 1</p>
+    <p><strong>Infixe :</strong> 3, -, 5, +, 4, *, 5, -, 1</p>
+    <p><strong>Postfixe :</strong> 3, 5, 4, +, 5, 1, -, *, -</p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD4</span><h4>Unicite d'un ABR</h4></div><div class="exo-body">
+  <p>Existe-t-il un seul ABR pour un ensemble de valeurs donne ?</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p><strong>Non !</strong> L'ordre d'insertion change la structure. {1,2,3} insere 1&rarr;2&rarr;3 = arbre lineaire (degenere). Insere 2&rarr;1&rarr;3 = arbre equilibre.</p>
+    <p>Voir les diagrammes dans la section ABR ci-dessus : memes 7 valeurs, deux arbres tres differents selon l'ordre.</p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD4</span><h4>Construction d'un Trie</h4></div><div class="exo-body">
+  <p>Construire le trie de {a, an, anti, antique, art, atome, atoll, va}.</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+<pre>racine
++-- a *
+|   +-- n *  -->  t --> i *  -->  q --> u --> e *
+|   +-- r --> t *
+|   +-- t --> o --> m --> e *
+|                  +-- l --> l *
++-- v --> a *</pre>
+    <p>Les noeuds marques * sont des fins de mot. Un diagramme SVG complet est montre dans la section Trie ci-dessus (pour un sous-ensemble simplifie).</p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD6</span><h4>Somme des valeurs d'un arbre</h4></div><div class="exo-body">
+  <p>Ecrire un algorithme calculant la somme des valeurs d'un arbre binaire.</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+<pre><span class="kw">def</span> <span class="fn">somme</span>(a):
+    <span class="kw">if</span> a <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="nu">0</span>
+    <span class="kw">return</span> a[<span class="st">"valeur"</span>] <span class="op">+</span> <span class="fn">somme</span>(a[<span class="st">"sag"</span>]) <span class="op">+</span> <span class="fn">somme</span>(a[<span class="st">"sad"</span>])</pre>
+    <p>Complexite : O(n) -- chaque noeud est visite exactement une fois.</p>
+  </div></div>
+</div></div>
+
+<hr>
+
+<h2 id="exo-graphes"><span class="badge badge-exo">EXERCICES</span> Graphes</h2>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD5</span><h4>Graphe de Petersen -- DFS et BFS depuis 8</h4></div><div class="exo-body">
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+<pre><span class="cm"># Representation creuse</span>
+G = [[<span class="nu">1</span>,<span class="nu">4</span>,<span class="nu">5</span>],[<span class="nu">0</span>,<span class="nu">2</span>,<span class="nu">6</span>],[<span class="nu">1</span>,<span class="nu">3</span>,<span class="nu">7</span>],[<span class="nu">2</span>,<span class="nu">4</span>,<span class="nu">8</span>],[<span class="nu">0</span>,<span class="nu">3</span>,<span class="nu">9</span>],
+     [<span class="nu">0</span>,<span class="nu">7</span>,<span class="nu">8</span>],[<span class="nu">1</span>,<span class="nu">8</span>,<span class="nu">9</span>],[<span class="nu">2</span>,<span class="nu">5</span>,<span class="nu">9</span>],[<span class="nu">3</span>,<span class="nu">5</span>,<span class="nu">6</span>],[<span class="nu">4</span>,<span class="nu">6</span>,<span class="nu">7</span>]]</pre>
+    <p><strong>DFS depuis 8 :</strong> 8, 6, 9, 7, 5, 0, 4, 3, 2, 1</p>
+    <p><strong>BFS depuis 8 :</strong> 8, 3, 5, 6, 2, 4, 0, 7, 1, 9</p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD5</span><h4>Kruskal sur graphe pondere (7 sommets)</h4></div><div class="exo-body">
+  <p>Matrice : <code>[[0,6,9,4,1,3,4],[6,0,2,0,0,0,7],[9,2,0,8,0,0,0],[4,0,8,0,5,0,0],[1,0,0,5,0,2,0],[3,0,0,0,2,0,1],[4,7,0,0,0,1,0]]</code></p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p><strong>Aretes triees :</strong> (0,4)=1, (5,6)=1, (1,2)=2, (4,5)=2, (0,5)=3, (0,3)=4, ...</p>
+    <div class="table-wrap"><table>
+      <tr><th>Arete</th><th>Poids</th><th>comp[] avant</th><th>Action</th></tr>
+      <tr><td>(0,4)</td><td>1</td><td>[0,1,2,3,4,5,6]</td><td>0!=4 &rarr; RETENIR. comp[4]&rarr;0</td></tr>
+      <tr><td>(5,6)</td><td>1</td><td>[0,1,2,3,0,5,6]</td><td>5!=6 &rarr; RETENIR. comp[6]&rarr;5</td></tr>
+      <tr><td>(1,2)</td><td>2</td><td>[0,1,2,3,0,5,5]</td><td>1!=2 &rarr; RETENIR. comp[2]&rarr;1</td></tr>
+      <tr><td>(4,5)</td><td>2</td><td>[0,1,1,3,0,5,5]</td><td>0!=5 &rarr; RETENIR. Tous les 5&rarr;0</td></tr>
+      <tr><td>(0,5)</td><td>3</td><td>[0,1,1,3,0,0,0]</td><td>0==0 &rarr; REJETER (cycle)</td></tr>
+      <tr><td>(0,3)</td><td>4</td><td>[0,1,1,3,0,0,0]</td><td>0!=3 &rarr; RETENIR. comp[3]&rarr;0</td></tr>
+      <tr><td>(0,1)</td><td>6</td><td>[0,1,1,0,0,0,0]</td><td>0!=1 &rarr; RETENIR. Tous les 1&rarr;0</td></tr>
+    </table></div>
+    <p><strong>Cout ACM = 1+1+2+2+4+6 = 16</strong></p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD6</span><h4>Conversions pleine - creuse</h4></div><div class="exo-body">
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+<pre><span class="kw">def</span> <span class="fn">pleine_vers_creuse</span>(M):
+    <span class="kw">return</span> [[j <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(M)) <span class="kw">if</span> M[i][j] <span class="op">!=</span> <span class="nu">0</span>] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(M))]
+
+<span class="kw">def</span> <span class="fn">creuse_vers_pleine</span>(L):
+    n <span class="op">=</span> <span class="fn">len</span>(L)
+    M <span class="op">=</span> [[<span class="nu">0</span>]<span class="op">*</span>n <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n)]
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):
+        <span class="kw">for</span> j <span class="kw">in</span> L[i]: M[i][j] <span class="op">=</span> <span class="nu">1</span>
+    <span class="kw">return</span> M</pre>
+  </div></div>
+</div></div>
+
+<hr>
+
+<h2 id="exo-complexite"><span class="badge badge-exo">EXERCICES</span> Complexite</h2>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD8 Ex1</span><h4>Ordres de complexite de 8 suites</h4></div><div class="exo-body">
+  <p>Trouver le theta-equivalent : 1) 0.001n&sup2;-100000n  2) 2<sup>n/2</sup>  3) log(n&sup2;+1)  4) n&sup2;  5) n&sup2;(log(3n)+5)  6) 3000n+28  7) 2<sup>n+1</sup>  8) 3&#8319;-2&#8319;</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p>1) <strong>theta(n&sup2;)</strong> -- n&sup2; domine n</p>
+    <p>2) <strong>theta((racine(2))&#8319;)</strong></p>
+    <p>3) <strong>theta(log n)</strong> -- log(n&sup2;) = 2log(n)</p>
+    <p>4) <strong>theta(n&sup2;)</strong></p>
+    <p>5) <strong>theta(n&sup2; log n)</strong></p>
+    <p>6) <strong>theta(n)</strong></p>
+    <p>7) <strong>theta(2&#8319;)</strong> -- 2<sup>n+1</sup> = 2 x 2&#8319;, constante</p>
+    <p>8) <strong>theta(3&#8319;)</strong> -- 3&#8319; domine 2&#8319;</p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD8 Ex2</span><h4>A (n&sup2;) vs B (10&#8313;*n)</h4></div><div class="exo-body">
+  <p>1) Ordres ? 2) Lequel semble meilleur ? 3) A partir de quel n ?</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p>1) A = theta(n&sup2;), B = theta(n)</p>
+    <p>2) B semble meilleur (lineaire &lt; quadratique)</p>
+    <p>3) 10&#8313;*n &lt; n&sup2; &rarr; <strong>n &gt; 10&#8313;</strong>. B ne gagne qu'au-dela d'un milliard !</p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD8 Ex3</span><h4>Bulles vs Fusion -- contrainte 1 Go</h4></div><div class="exo-body">
+  <p>Bulles : n&sup2;/2, pas d'espace. Fusion : n*log2(n), tableau auxiliaire n valeurs (2 octets). 1 Go dispo.</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p>n x 2 &le; 10&#8313; &rarr; <strong>n &le; 5x10&#8312;</strong> : tri fusion. <strong>n &gt; 5x10&#8312;</strong> : pas assez de RAM &rarr; tri a bulles.</p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD8 Ex4</span><h4>Compter les additions dans 6 boucles</h4></div><div class="exo-body">
+<pre><span class="cm"># 1)</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): som<span class="op">=</span>som<span class="op">+</span><span class="nu">1</span>
+<span class="cm"># 2)</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(n): som<span class="op">=</span>som<span class="op">+</span><span class="nu">1</span>
+<span class="cm"># 3)</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(n<span class="op">**</span><span class="nu">2</span>): <span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(n<span class="op">**</span><span class="nu">3</span>): som<span class="op">=</span>som<span class="op">+</span><span class="nu">1</span>
+<span class="cm"># 4)</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(i<span class="op">+</span><span class="nu">1</span>): som<span class="op">=</span>som<span class="op">+</span><span class="nu">1</span>
+<span class="cm"># 5)</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(i,n): som<span class="op">=</span>som<span class="op">+</span><span class="nu">1</span>
+<span class="cm"># 6)</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): som<span class="op">=</span>som<span class="op">+</span><span class="nu">1</span>; <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(n): som<span class="op">=</span>som<span class="op">+</span><span class="nu">1</span></pre>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p>1) <strong>O(n)</strong> -- une boucle de n iterations</p>
+    <p>2) <strong>O(n&sup2;)</strong> -- n x n</p>
+    <p>3) <strong>O(n&#8310;)</strong> -- n x n&sup2; x n&sup3;</p>
+    <p>4) <strong>O(n&sup2;)</strong> -- somme(i+1) = n(n+1)/2</p>
+    <p>5) <strong>O(n&sup2;)</strong> -- somme(n-i) = n(n+1)/2</p>
+    <p>6) <strong>O(n&sup2;)</strong> -- n x (1+n)</p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">TD8 Ex5</span><h4>Theoreme maitre -- F(n) = 2*F(n//3) + n</h4></div><div class="exo-body">
+<pre><span class="kw">def</span> <span class="fn">F</span>(n):
+    <span class="kw">if</span> n <span class="op">==</span> <span class="nu">0</span>: &lt;op&gt;
+    <span class="kw">else</span>:
+        <span class="fn">F</span>(n<span class="op">//</span><span class="nu">3</span>); <span class="fn">F</span>(n<span class="op">//</span><span class="nu">3</span>)
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n): &lt;op&gt;</pre>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p>T(n) = 2*T(n/3) + n &rarr; c=2, d=3, k=1 &rarr; d&#7496;=3 &gt; c=2 &rarr; <strong>Cas 2.3 &rarr; O(n)</strong></p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">Entrainement</span><h4>6 recurrences -- Theoreme maitre</h4></div><div class="exo-body">
+  <p>1) T(n)=T(n-1)+5  2) T(n)=T(n-1)+3n  3) T(n)=2T(n-1)+1  4) T(n)=4T(n/2)+n  5) T(n)=2T(n/2)+n  6) T(n)=3T(n/2)+n&sup2;</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p>1) Cas 1.1 (c=1, k=0) &rarr; <strong>O(n)</strong></p>
+    <p>2) Cas 1.1 (c=1, k=1) &rarr; <strong>O(n&sup2;)</strong></p>
+    <p>3) Cas 1.2 (c=2 &gt; 1) &rarr; <strong>O(2&#8319;)</strong></p>
+    <p>4) Cas 2.1 (c=4, d=2, k=1, d&#7496;=2 &lt; 4) &rarr; O(n<sup>log&#8322;4</sup>) = <strong>O(n&sup2;)</strong></p>
+    <p>5) Cas 2.2 (c=2, d=2, k=1, d&#7496;=2=c) &rarr; <strong>O(n log n)</strong></p>
+    <p>6) Cas 2.3 (c=3, d=2, k=2, d&#7496;=4 &gt; 3) &rarr; <strong>O(n&sup2;)</strong></p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">Entrainement</span><h4>Trace de RechDic(5, T)</h4></div><div class="exo-body">
+  <p>Tracer pour : 1) [1,3,5]  2) [5,5,5,9]  3) [1,3,7,9]  4) [1,2,3,4]  5) [6,7,8,9]</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p>1) deb=0 &rarr; mil=1 (3&lt;5) &rarr; deb=2 / deb=2 &rarr; mil=2 (5&ge;5) &rarr; fin=1 / T[2]=5 &rarr; <strong>retourne 2</strong></p>
+    <p>2) deb=0 &rarr; mil=1 (5&ge;5) &rarr; fin=0 / deb=0 &rarr; mil=0 (5&ge;5) &rarr; fin=-1 / T[0]=5 &rarr; <strong>retourne 0</strong></p>
+    <p>3) deb=0 &rarr; mil=1 (3&lt;5) &rarr; deb=2 / deb=2 &rarr; mil=2 (7&ge;5) &rarr; fin=1 / T[2]=7 != 5 &rarr; <strong>retourne -1</strong></p>
+    <p>4) Meme logique &rarr; <strong>retourne -1</strong></p>
+    <p>5) T[0]=6 != 5 &rarr; <strong>retourne -1</strong></p>
+  </div></div>
+</div></div>
+
+<div class="exo"><div class="exo-head"><span class="exo-tag">Entrainement</span><h4>Sous-somme maximale -- 4 approches</h4></div><div class="exo-body">
+  <p>Comparer O(n&sup3;), O(n&sup2;), O(n log n), O(n) pour trouver la plus grande somme d'elements consecutifs.</p>
+  <button class="sol-btn" onclick="sol(this)"><span class="arrow">&#9656;</span> Solution</button>
+  <div class="sol-box"><div class="sol-inner">
+    <p><strong>O(n&sup3;)</strong> : 3 boucles -- teste toutes paires (i,j), recalcule la somme. <strong>O(n&sup2;)</strong> : accumulation incrementale. <strong>O(n log n)</strong> : diviser pour regner. <strong>O(n) -- Kadane :</strong></p>
+<pre><span class="kw">def</span> <span class="fn">kadane</span>(T):
+    max_s <span class="op">=</span> cur <span class="op">=</span> T[<span class="nu">0</span>]
+    <span class="kw">for</span> x <span class="kw">in</span> T[<span class="nu">1</span>:]:
+        cur <span class="op">=</span> <span class="fn">max</span>(x, cur <span class="op">+</span> x)
+        max_s <span class="op">=</span> <span class="fn">max</span>(max_s, cur)
+    <span class="kw">return</span> max_s</pre>
+  </div></div>
+</div></div>
+
+<hr>
+
+<!-- ================================================================= -->
+<!--              FLASHCARDS                                           -->
+<!-- ================================================================= -->
+
+<h2 id="flashcards">Flashcards</h2>
+<p style="color:#999;font-size:0.85rem;margin-bottom:0.8rem">Clique pour reveler la reponse.</p>
+
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Quel parcours d'ABR donne les valeurs triees ?</div><div class="fc-a"><strong>Infixe</strong> (GRD).</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Seule difference de code entre DFS et BFS ?</div><div class="fc-a"><code>.pop()</code> vs <code>.pop(0)</code></div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Simplifier 3n&sup2; + 10n + 500</div><div class="fc-a"><strong>O(n&sup2;)</strong></div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Qu'est-ce qu'un tas max ?</div><div class="fc-a">Arbre complet, pere &ge; fils, max a la racine.</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Complexite du tri fusion ?</div><div class="fc-a"><strong>O(n log n)</strong> -- cas 2.2 du th. maitre.</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Quand Kruskal rejette une arete ?</div><div class="fc-a">Quand les deux sommets sont deja dans la meme composante (meme numero).</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Complexite de la recherche dichotomique ?</div><div class="fc-a"><strong>O(log n)</strong></div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">T(n) = 2T(n-1) + 1 &rarr; resultat ?</div><div class="fc-a">Cas 1.2 (c=2&gt;1) &rarr; <strong>O(2&#8319;)</strong></div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Le tri fusion est-il en place ?</div><div class="fc-a"><strong>Non</strong> -- tableau auxiliaire de taille n.</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Matrice d'un graphe non oriente : quelle propriete ?</div><div class="fc-a"><strong>Symetrique</strong> : M[i][j] = M[j][i]</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">2&#8319; + n&#8313;&#8304;&#8304; = O(?) </div><div class="fc-a"><strong>O(2&#8319;)</strong> -- l'exponentielle domine toujours.</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Fils de l'indice i dans un tas ?</div><div class="fc-a"><code>2i+1</code> (gauche) et <code>2i+2</code> (droit). Pere = <code>(i-1)//2</code></div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">T(n) = 4T(n/2) + n &rarr; resultat ?</div><div class="fc-a">Cas 2.1 (4&gt;2) &rarr; O(n<sup>log&#8322;4</sup>) = <strong>O(n&sup2;)</strong></div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">3&#8319; - 2&#8319; = theta(?) </div><div class="fc-a"><strong>theta(3&#8319;)</strong> -- 3&#8319; domine 2&#8319;.</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Somme(i) pour i=1 a n = ?</div><div class="fc-a"><strong>n(n+1)/2 = O(n&sup2;)</strong></div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Prefixe = quel ordre ?</div><div class="fc-a"><strong>R</strong>acine, <strong>G</strong>auche, <strong>D</strong>roite</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Qu'est-ce qu'un trie ?</div><div class="fc-a">Arbre n-aire ou chaque arete represente un caractere. Recherche en O(longueur du mot).</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Que fait heapify (tamiser) ?</div><div class="fc-a">Echange un noeud avec son plus grand fils tant qu'il est plus petit, pour restaurer la propriete du tas.</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Complexite de Kruskal ?</div><div class="fc-a"><strong>O(m log m)</strong> domine par le tri des aretes (m = nombre d'aretes).</div></div>
+<div class="fc" onclick="this.classList.toggle('open')"><div class="fc-q">Postfixe de (3-(5+4)*(5-1)) ?</div><div class="fc-a">3, 5, 4, +, 5, 1, -, *, -</div></div>
+
+<hr>
+
+<!-- ================================================================= -->
+<!--              AIDE-MEMOIRE                                         -->
+<!-- ================================================================= -->
+
+<div class="box box-tip">
+  <div class="box-label">Aide-memoire</div>
+  <p><strong>Landau :</strong> T(n) = O(f(n)) &hArr; il existe c, n0 tels que T(n) &le; c*f(n) pour tout n &gt; n0</p>
+  <p><strong>Hierarchie :</strong> O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n&sup2;) &lt; O(2&#8319;)</p>
+  <p><strong>DFS</strong> = pile = <code>pop()</code> &middot; <strong>BFS</strong> = file = <code>pop(0)</code></p>
+  <p><strong>ABR infixe</strong> = valeurs triees &middot; <strong>Tas</strong> : fils = 2i+1, 2i+2 ; pere = (i-1)//2</p>
+  <p><strong>Kruskal</strong> : trier aretes &rarr; retenir si composantes differentes &rarr; unifier</p>
+  <p><strong>Dijkstra</strong> : Dist[source]=0, repeter : traiter le sommet avec le plus petit Dist, mettre a jour voisins</p>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Pieges classiques</div>
+  <ul>
+    <li>Prefixe (RGD) != Infixe (GRD) != Postfixe (GDR)</li>
+    <li>Tri fusion <strong>pas en place</strong> (tableau auxiliaire)</li>
+    <li>2<sup>n+1</sup> = theta(2&#8319;) -- le x2 est une constante</li>
+    <li>3&#8319; - 2&#8319; = theta(3&#8319;) -- pas theta(3&#8319;-2&#8319;)</li>
+    <li>Kruskal : <strong>trier d'abord</strong>, puis verifier les composantes</li>
+    <li>Bien identifier c, d, k <strong>avant</strong> d'appliquer le theoreme maitre</li>
+    <li>ABR : l'ordre d'insertion change la forme (equilibre vs degenere)</li>
+    <li>Tas != ABR : un tas n'a pas la propriete gauche &lt; racine &lt; droite</li>
+    <li>Dijkstra ne marche <strong>pas</strong> avec des poids negatifs</li>
+  </ul>
+</div>
+
+<div class="box box-info">
+  <div class="box-label">Programme du CC (TD6)</div>
+  <p>Tri par tas et Dijkstra <strong>hors programme</strong> du controle continu. Priorite : maitriser les exercices des TD.</p>
+</div>
+
+<p style="text-align:center;color:#ccc;margin-top:3rem;font-size:0.8rem">HA8203I -- Daude / Grandcolas -- Polytech PEIP</p>
+
+</div>
+
+<script>
+function sol(btn){
+  btn.classList.toggle('open');
+  var box=btn.nextElementSibling;
+  box.classList.toggle('open');
+  var arrow=btn.querySelector('.arrow');
+  arrow.textContent=box.classList.contains('open')?'\u25BE':'\u25B8';
+}
+</script>
+</body>
+</html>
